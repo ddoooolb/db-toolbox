@@ -1,0 +1,176 @@
+.attendance-main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.attendance-header {
+  background: linear-gradient(135deg, var(--vite-text) 0%, #5165e8 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.attendance-header p {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.attendance-header h2 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.today {
+  font-weight: 600;
+}
+
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.slot-button {
+  padding: 15px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.slot-button:hover {
+  border-color: var(--vite-text);
+  background: var(--bg-soft);
+}
+
+.slot-button.active {
+  background: var(--vite-text);
+  color: white;
+  border-color: var(--vite-text);
+}
+
+.sports-selection {
+  margin-bottom: 30px;
+}
+
+.sports-selection h3 {
+  color: var(--text);
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.sports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.sport-button {
+  padding: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.sport-button:hover {
+  border-color: #4a90e2;
+  background: rgba(74, 144, 226, 0.1);
+}
+
+.sport-button.active {
+  background: #4a90e2;
+  color: white;
+  border-color: #4a90e2;
+}
+
+.student-attendance {
+  background: var(--bg-soft);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.student-attendance h3 {
+  color: var(--text);
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.no-students {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+}
+
+.student-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 15px;
+}
+
+.student-button {
+  position: relative;
+  padding: 15px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-button:hover {
+  border-color: #4a90e2;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+}
+
+.student-button.marked {
+  background: #e8f5e9;
+  border-color: #4caf50;
+}
+
+.student-info {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.student-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.student-button.marked .student-name {
+  color: #2e7d32;
+}
+
+.checkmark {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #4caf50;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}

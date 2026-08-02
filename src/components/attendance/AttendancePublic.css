@@ -1,0 +1,55 @@
+.attendance-public {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.public-header {
+  background: linear-gradient(135deg, var(--vite-text) 0%, #5165e8 100%);
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.public-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+}
+
+.public-header .subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.public-content {
+  flex: 1;
+  padding: 30px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.public-footer {
+  background: var(--bg-soft);
+  border-top: 1px solid var(--border);
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.public-footer p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .public-header h1 {
+    font-size: 24px;
+  }
+
+  .public-content {
+    padding: 20px 15px;
+  }
+}

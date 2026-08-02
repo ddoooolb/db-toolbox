@@ -1,0 +1,258 @@
+.student-management {
+  max-width: 1000px;
+}
+
+.csv-upload-section {
+  background: #e3f2fd;
+  border: 2px dashed #2196f3;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.csv-upload-section h3 {
+  margin-top: 0;
+  color: #1976d2;
+}
+
+.csv-form {
+  display: flex;
+  gap: 15px;
+}
+
+.csv-form-row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.csv-form .form-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.csv-form input[type="file"] {
+  padding: 6px;
+  font-size: 13px;
+}
+
+.btn-upload {
+  padding: 8px 24px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.btn-upload:hover {
+  background: #1976d2;
+}
+
+.divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 30px 0;
+}
+
+.student-management h2 {
+  color: var(--vite-text);
+  margin-top: 0;
+}
+
+.student-form {
+  background: var(--bg-soft);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--vite-text);
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.btn-submit,
+.btn-cancel {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.3s;
+  align-self: flex-end;
+}
+
+.btn-submit {
+  background: var(--vite-text);
+  color: white;
+}
+
+.btn-submit:hover {
+  background: #5165e8;
+}
+
+.btn-cancel {
+  background: var(--border);
+  color: var(--text);
+}
+
+.btn-cancel:hover {
+  background: #ddd;
+}
+
+.student-list {
+  margin-top: 30px;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.list-header h3 {
+  color: var(--text);
+  margin: 0;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-group label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.filter-group select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filter-group select:focus {
+  outline: none;
+  border-color: var(--vite-text);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg);
+}
+
+table thead {
+  background: var(--bg-soft);
+  border-bottom: 2px solid var(--border);
+}
+
+table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+table tbody tr:hover {
+  background: var(--bg-soft);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.btn-edit {
+  background: #4a90e2;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #357abd;
+}
+
+.btn-delete {
+  background: #e84c3d;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #c23321;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+}

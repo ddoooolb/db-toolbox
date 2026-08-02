@@ -1,0 +1,183 @@
+.statistics {
+  max-width: 1200px;
+}
+
+.statistics h2 {
+  color: var(--vite-text);
+  margin-top: 0;
+}
+
+.sport-selector {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.sport-selector label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sport-selector select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.sport-selector select:focus {
+  outline: none;
+  border-color: var(--vite-text);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.statistics-table {
+  background: var(--bg-soft);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.table-header h3 {
+  margin: 0;
+  color: var(--vite-text);
+}
+
+.table-header .info {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg);
+}
+
+table thead {
+  background: var(--bg-soft);
+  border-bottom: 2px solid var(--border);
+}
+
+table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+table tbody tr:hover {
+  background: var(--bg-soft);
+}
+
+.attendance-days {
+  font-weight: 600;
+  color: var(--vite-text);
+  text-align: center;
+}
+
+.attendance-rate {
+  width: 200px;
+}
+
+.rate-bar {
+  position: relative;
+  height: 28px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 150px;
+}
+
+.rate-fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  transition: width 0.3s;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* 80% 이상: 초록색 */
+.rate-bar.rate-high .rate-fill {
+  background: linear-gradient(90deg, #10b981, #059669);
+  color: white;
+}
+
+/* 50~80%: 노란색 */
+.rate-bar.rate-medium .rate-fill {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  color: white;
+}
+
+/* 50% 미만: 빨간색 */
+.rate-bar.rate-low .rate-fill {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.empty-message {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+  background: var(--bg-soft);
+  border-radius: 8px;
+}
+
+.legend {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg-soft);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.legend span::before {
+  content: '';
+  width: 30px;
+  height: 20px;
+  border-radius: 3px;
+}
+
+.legend-high::before {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.legend-medium::before {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.legend-low::before {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}

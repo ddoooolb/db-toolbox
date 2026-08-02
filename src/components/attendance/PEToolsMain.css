@@ -1,0 +1,64 @@
+.petools-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.petools-menu {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.menu-item {
+  padding: 10px 20px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.menu-item:hover {
+  border-color: var(--vite-text);
+  background: var(--bg-soft);
+}
+
+.menu-item.active {
+  background: var(--vite-text);
+  color: white;
+  border-color: var(--vite-text);
+}
+
+.petools-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.attendance-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.admin-link-button {
+  padding: 8px 16px;
+  background: var(--vite-text);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.admin-link-button:hover {
+  background: #2563eb;
+}
