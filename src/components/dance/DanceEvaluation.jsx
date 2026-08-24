@@ -40,27 +40,30 @@ function DanceEvaluation() {
   }, [activeClass])
 
   useEffect(() => {
-    const groupsData = JSON.parse(localStorage.getItem('groups-data') || '{}')
-    const builtClasses = {}
-    Object.entries(groupsData).forEach(([classId, classGroups]) => {
-      builtClasses[classId] = {
-        label: classId,
-        groups: {},
-        leaders: {}
-      }
-      Object.entries(classGroups).forEach(([groupName, groupData]) => {
-        const memberNames = groupData.members.map(m => m.name)
-        // 조장도 조원 목록에 포함
-        if (groupData.leader && !memberNames.includes(groupData.leader)) {
-          memberNames.push(groupData.leader)
+    const timer = setTimeout(() => {
+      const groupsData = JSON.parse(localStorage.getItem('groups-data') || '{}')
+      const builtClasses = {}
+      Object.entries(groupsData).forEach(([classId, classGroups]) => {
+        builtClasses[classId] = {
+          label: classId,
+          groups: {},
+          leaders: {}
         }
-        builtClasses[classId].groups[groupName] = memberNames
-        if (groupData.leader) {
-          builtClasses[classId].leaders[groupName] = groupData.leader
-        }
+        Object.entries(classGroups).forEach(([groupName, groupData]) => {
+          const memberNames = groupData.members.map(m => m.name)
+          // 조장도 조원 목록에 포함
+          if (groupData.leader && !memberNames.includes(groupData.leader)) {
+            memberNames.push(groupData.leader)
+          }
+          builtClasses[classId].groups[groupName] = memberNames
+          if (groupData.leader) {
+            builtClasses[classId].leaders[groupName] = groupData.leader
+          }
+        })
       })
-    })
-    setClasses(builtClasses)
+      setClasses(builtClasses)
+    }, 100)
+    return () => clearTimeout(timer)
   }, [])
 
   const classData = activeClass ? classes[activeClass] : null
