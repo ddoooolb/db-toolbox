@@ -1,0 +1,303 @@
+:root {
+  --ink: #1a2233;
+  --paper: #faf8f5;
+  --card: #ffffff;
+  --line: #e4e1da;
+  --coral: #ff6b4a;
+  --coral-deep: #e2502f;
+  --navy: #232f52;
+  --navy-soft: #5b6684;
+  --mute: #8a8f9c;
+  --ok: #2f9e6e;
+}
+
+.dance-wrap {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 0 60px;
+}
+
+.dance-header {
+  padding: 28px 20px 22px;
+  background: var(--navy);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.dance-header::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: var(--coral);
+  opacity: 0.18;
+}
+
+.dance-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffb8a3;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.dance-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.dance-sub {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: #c7cce0;
+}
+
+.dance-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.dance-step-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--coral-deep);
+  margin-bottom: 8px;
+}
+
+.dance-field-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 14px 0 6px;
+}
+
+.dance-field-label:first-child {
+  margin-top: 0;
+}
+
+.dance-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  font-size: 15px;
+  background: #fff;
+  color: var(--ink);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%235b6684' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+
+.dance-eval-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dance-eval-type-btn {
+  padding: 12px 6px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy-soft);
+  cursor: pointer;
+  line-height: 1.3;
+  transition: all 0.2s;
+}
+
+.dance-eval-type-btn.sel {
+  border-color: var(--coral);
+  background: #fff2ee;
+  color: var(--coral-deep);
+}
+
+.dance-target-block {
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.dance-target-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.dance-rubric-opt {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dance-rubric-opt.sel {
+  border-color: var(--coral);
+  background: #fff2ee;
+}
+
+.dance-rubric-opt input {
+  margin-top: 3px;
+  accent-color: var(--coral);
+}
+
+.dance-rubric-text {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.dance-rubric-score {
+  font-weight: 800;
+  color: var(--coral-deep);
+  font-size: 13px;
+  white-space: nowrap;
+  margin-left: auto;
+  padding-left: 8px;
+}
+
+.dance-submit-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: var(--coral);
+  color: #fff;
+  font-size: 15.5px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: all 0.2s;
+}
+
+.dance-submit-btn:disabled {
+  background: #d9d5cd;
+  color: #a8a49b;
+  cursor: not-allowed;
+}
+
+.dance-msg {
+  text-align: center;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+
+.dance-msg.ok {
+  background: #e8f7f0;
+  color: var(--ok);
+}
+
+.dance-msg.err {
+  background: #fdeceb;
+  color: #c0392b;
+}
+
+.dance-lock-notice {
+  margin-top: 10px;
+}
+
+.dance-guide-card {
+  padding: 14px 18px;
+}
+
+.dance-guide-summary {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--navy);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.dance-guide-summary::after {
+  content: "▾";
+  color: var(--mute);
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.dance-guide-details {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.dance-guide-details p {
+  margin: 0 0 12px;
+}
+
+.dance-guide-details b {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.dance-guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+}
+
+.dance-guide-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.dance-guide-table .gscore {
+  font-weight: 800;
+  color: var(--coral-deep);
+  white-space: nowrap;
+  width: 1%;
+  text-align: center;
+}
+
+.dance-warn-card {
+  border-color: #f3c6c0;
+}
+
+.dance-warn-card .dance-guide-summary {
+  color: #c0392b;
+}
+
+.dance-footer-note {
+  font-size: 11.5px;
+  color: var(--mute);
+  text-align: center;
+  padding: 20px 20px 0;
+  line-height: 1.6;
+}

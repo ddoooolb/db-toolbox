@@ -57,13 +57,6 @@ function AttendanceMain({ students, attendance, setAttendance }) {
 
   return (
     <div className="attendance-main">
-      <div className="attendance-header">
-        <div>
-          <p className="today">{getFormattedDate()}</p>
-          <h2>학교스포츠클럽 출석</h2>
-        </div>
-      </div>
-
       <div className="time-slots">
         {TIME_SLOTS.map(slot => (
           <button

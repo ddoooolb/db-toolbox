@@ -1,12 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PEToolsMain from './components/attendance/PEToolsMain'
 import AttendancePublic from './components/attendance/AttendancePublic'
+import DanceEvaluation from './components/dance/DanceEvaluation'
 import { initialStudents } from './data/students'
+import { initialGroupsData } from './data/groupsData'
 import './App.css'
 
 function App() {
+  useEffect(() => {
+    const existing = JSON.parse(localStorage.getItem('groups-data') || '{}')
+    const merged = { ...existing, ...initialGroupsData }
+    localStorage.setItem('groups-data', JSON.stringify(merged))
+  }, [])
+
   const searchParams = new URLSearchParams(window.location.search)
   const attendanceMode = searchParams.get('mode') === 'attendance'
+  const danceMode = searchParams.get('mode') === 'dance'
 
   const [activeTab, setActiveTab] = useState('petools')
   const [students, setStudents] = useState(initialStudents)
@@ -14,6 +23,11 @@ function App() {
   // 출석 전용 모드
   if (attendanceMode) {
     return <AttendancePublic students={initialStudents} />
+  }
+
+  // 댄스 평가 모드
+  if (danceMode) {
+    return <DanceEvaluation />
   }
 
   return (

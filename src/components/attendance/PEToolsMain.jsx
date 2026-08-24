@@ -2,10 +2,12 @@ import { useState } from 'react'
 import AttendanceMain from './AttendanceMain'
 import AdminLogin from '../admin/AdminLogin'
 import AdminPanel from '../admin/AdminPanel'
+import DanceEvaluation from '../dance/DanceEvaluation'
 import './PEToolsMain.css'
 
 const PETOOLS_MENUS = [
-  { id: 'attendance', name: '학교스포츠클럽 출석' }
+  { id: 'attendance', name: '학교스포츠클럽 출석' },
+  { id: 'dance', name: '댄스 평가' }
 ]
 
 function PEToolsMain({ students, setStudents }) {
@@ -58,6 +60,10 @@ function PEToolsMain({ students, setStudents }) {
               setAttendance={setAttendance}
             />
           </>
+        )}
+
+        {activeMenu === 'dance' && (
+          <DanceEvaluation />
         )}
 
         {activeMenu === 'admin' && (

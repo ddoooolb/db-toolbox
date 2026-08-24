@@ -34,29 +34,7 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #cbd5e1;
-    --text-h: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --bg: #0f172a;
-    --bg-soft: #1e293b;
-    --border: #334155;
-    --code-bg: #1e3a8a;
-    --accent: #60a5fa;
-    --accent-bg: rgba(96, 165, 250, 0.15);
-    --accent-border: rgba(96, 165, 250, 0.5);
-    --social-bg: rgba(51, 65, 85, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-    --vite-text: #60a5fa;
-    --vite-bg: #0f172a;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
+/* 다크모드 비활성화 - 라이트모드만 사용 */
 
 body {
   margin: 0;

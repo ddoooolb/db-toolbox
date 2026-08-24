@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import * as XLSX from 'xlsx'
 import './StudentManagement.css'
 
 const SPORTS = [
@@ -70,38 +71,78 @@ function StudentManagement({ students, setStudents }) {
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      try {
-        const csv = event.target.result
-        const lines = csv.split('\n').filter(line => line.trim())
+    const isExcel = csvFile.name.endsWith('.xlsx') || csvFile.name.endsWith('.xls')
 
-        // 첫 줄은 헤더이므로 스킵
-        const newStudents = lines.slice(1).map(line => {
-          const [grade, classNum, number, name] = line.split(',').map(col => col.trim())
+    if (isExcel) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const data = new Uint8Array(event.target.result)
+          const workbook = XLSX.read(data, { type: 'array' })
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+          const jsonData = XLSX.utils.sheet_to_json(worksheet)
 
-          if (!grade || !classNum || !number || !name) return null
+          const newStudents = jsonData.map(row => {
+            const grade = String(row.grade || row['학년'] || '')
+            const classNum = String(row.class || row['반'] || '')
+            const number = String(row.number || row['번호'] || '')
+            const name = String(row.name || row['이름'] || '')
 
-          return {
-            grade,
-            class: classNum,
-            number,
-            name,
-            sports: csvSport,
-            id: Date.now().toString() + Math.random()
-          }
-        }).filter(Boolean)
+            if (!grade || !classNum || !number || !name) return null
 
-        setStudents([...students, ...newStudents])
-        setCsvFile(null)
-        setCsvSport('')
-        alert(`${newStudents.length}명의 학생이 추가되었습니다`)
-      } catch (error) {
-        alert('CSV 파일 처리 중 오류가 발생했습니다')
-        console.error(error)
+            return {
+              grade: grade.trim(),
+              class: classNum.trim(),
+              number: number.trim(),
+              name: name.trim(),
+              sports: csvSport,
+              id: Date.now().toString() + Math.random()
+            }
+          }).filter(Boolean)
+
+          setStudents([...students, ...newStudents])
+          setCsvFile(null)
+          setCsvSport('')
+          alert(`${newStudents.length}명의 학생이 추가되었습니다`)
+        } catch (error) {
+          alert('Excel 파일 처리 중 오류가 발생했습니다')
+          console.error(error)
+        }
       }
+      reader.readAsArrayBuffer(csvFile)
+    } else {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const csv = event.target.result
+          const lines = csv.split('\n').filter(line => line.trim())
+
+          const newStudents = lines.slice(1).map(line => {
+            const [grade, classNum, number, name] = line.split(',').map(col => col.trim())
+
+            if (!grade || !classNum || !number || !name) return null
+
+            return {
+              grade,
+              class: classNum,
+              number,
+              name,
+              sports: csvSport,
+              id: Date.now().toString() + Math.random()
+            }
+          }).filter(Boolean)
+
+          setStudents([...students, ...newStudents])
+          setCsvFile(null)
+          setCsvSport('')
+          alert(`${newStudents.length}명의 학생이 추가되었습니다`)
+        } catch (error) {
+          alert('CSV 파일 처리 중 오류가 발생했습니다')
+          console.error(error)
+        }
+      }
+      reader.readAsText(csvFile)
     }
-    reader.readAsText(csvFile)
   }
 
   const filteredAndSortedStudents = [...students]
@@ -117,7 +158,7 @@ function StudentManagement({ students, setStudents }) {
       <h2>학생 관리</h2>
 
       <div className="csv-upload-section">
-        <h3>CSV 파일로 일괄 업로드</h3>
+        <h3>CSV/Excel 파일로 일괄 업로드</h3>
         <form className="csv-form" onSubmit={handleCsvUpload}>
           <div className="csv-form-row">
             <div className="form-group">
@@ -134,10 +175,10 @@ function StudentManagement({ students, setStudents }) {
             </div>
 
             <div className="form-group">
-              <label>CSV 파일</label>
+              <label>CSV/Excel 파일</label>
               <input
                 type="file"
-                accept=".csv"
+                accept=".csv,.xlsx,.xls"
                 onChange={(e) => setCsvFile(e.target.files[0])}
               />
             </div>
