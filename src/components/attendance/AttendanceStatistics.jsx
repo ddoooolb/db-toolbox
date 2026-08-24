@@ -3,6 +3,8 @@ import './AttendanceStatistics.css'
 
 function AttendanceStatistics({ students, attendance }) {
   const [selectedSport, setSelectedSport] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
 
   const SPORTS = [
     '배구(남)',
@@ -17,11 +19,14 @@ function AttendanceStatistics({ students, attendance }) {
     '농구(남)'
   ]
 
-  const calculateStatistics = (sport) => {
+  const calculateStatistics = (sport, start, end) => {
     if (!sport) return null
 
     // 해당 종목의 학생들
-    const sportStudents = students.filter(s => s.sports === sport)
+    const sportStudents = students.filter(s => s.sports === sport || (
+      sport === '배구(남)' && s.sports === '배구(남,여)' ||
+      sport === '배구(여)' && s.sports === '배구(남,여)'
+    ))
     if (sportStudents.length === 0) return null
 
     // 해당 종목의 모든 운영일 찾기
@@ -29,7 +34,14 @@ function AttendanceStatistics({ students, attendance }) {
     Object.keys(attendance).forEach(key => {
       const [date, recordSport] = key.split('-').slice(0, 2)
       if (recordSport === sport) {
-        operatingDates.add(date)
+        // 날짜 범위 필터링
+        if (start && end) {
+          if (date >= start && date <= end) {
+            operatingDates.add(date)
+          }
+        } else {
+          operatingDates.add(date)
+        }
       }
     })
 
@@ -73,7 +85,7 @@ function AttendanceStatistics({ students, attendance }) {
     }
   }
 
-  const stats = calculateStatistics(selectedSport)
+  const stats = calculateStatistics(selectedSport, startDate, endDate)
 
   const getColorClass = (rate) => {
     if (rate >= 80) return 'rate-high'
@@ -86,13 +98,42 @@ function AttendanceStatistics({ students, attendance }) {
       <h2>출석 통계</h2>
 
       <div className="sport-selector">
-        <label>종목 선택:</label>
-        <select value={selectedSport} onChange={(e) => setSelectedSport(e.target.value)}>
-          <option value="">선택하세요</option>
-          {SPORTS.map(sport => (
-            <option key={sport} value={sport}>{sport}</option>
-          ))}
-        </select>
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '700', color: '#000' }}>종목 선택:</label>
+          <select value={selectedSport} onChange={(e) => setSelectedSport(e.target.value)} style={{ padding: '8px', width: '100%', borderRadius: '4px', border: '1px solid #ccc', color: '#000' }}>
+            <option value="">선택하세요</option>
+            {SPORTS.map(sport => (
+              <option key={sport} value={sport}>{sport}</option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '700', color: '#000', fontSize: '13px' }}>시작 날짜:</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              style={{ padding: '8px', width: '100%', borderRadius: '4px', border: '1px solid #ccc', color: '#000', background: '#fff' }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '700', color: '#000', fontSize: '13px' }}>종료 날짜:</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              style={{ padding: '8px', width: '100%', borderRadius: '4px', border: '1px solid #ccc', color: '#000', background: '#fff' }}
+            />
+          </div>
+        </div>
+
+        {selectedSport && (startDate || endDate) && (
+          <div style={{ marginTop: '12px', padding: '10px', background: '#e8f5e9', borderRadius: '4px', fontSize: '12px', color: '#2f9e6e', fontWeight: '600' }}>
+            📊 {startDate && `${startDate}부터`} {endDate && `${endDate}까지`} 데이터
+          </div>
+        )}
       </div>
 
       {stats ? (

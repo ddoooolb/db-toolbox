@@ -46,19 +46,29 @@ function PEToolsMain({ students, setStudents }) {
       <div className="petools-content">
         {activeMenu === 'attendance' && (
           <>
-            <div className="attendance-header-actions">
-              <button
-                className="admin-link-button"
-                onClick={() => setActiveMenu('admin')}
-              >
-                관리자
-              </button>
-            </div>
             <AttendanceMain
               students={students}
               attendance={attendance}
               setAttendance={setAttendance}
             />
+            <div className="attendance-header-actions" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: '100' }}>
+              <button
+                className="admin-link-button"
+                onClick={() => setActiveMenu('admin')}
+                style={{
+                  padding: '10px 16px',
+                  background: '#232f52',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '700',
+                  fontSize: '13px'
+                }}
+              >
+                🔐 관리자
+              </button>
+            </div>
           </>
         )}
 
