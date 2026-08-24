@@ -430,7 +430,9 @@ function DanceEvaluation() {
                 borderRadius: '10px',
                 border: '1.5px solid var(--line)',
                 fontSize: '15px',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                background: '#fff',
+                color: '#000'
               }}
             />
             <button

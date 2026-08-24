@@ -351,9 +351,34 @@ function DanceManagement() {
     return vals.reduce((a, b) => a + b, 0) / vals.length
   }
 
+  // 제외 전 점수 (모든 평가 포함)
+  const avgReceivedAll = (evalType, target) => {
+    const vals = Object.values(records)
+      .filter(r => r.evalType === evalType && r.target === target)
+      .map(r => r.score)
+    if (vals.length === 0) return null
+    return vals.reduce((a, b) => a + b, 0) / vals.length
+  }
+
+  // 점수 변화
+  const getScoreChange = (evalType, target) => {
+    const before = avgReceivedAll(evalType, target)
+    const after = avgReceived(evalType, target)
+    if (before === null || after === null) return null
+    const change = after - before
+    return change === 0 ? null : change
+  }
+
   if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>로드 중...</div>
 
-  const submittedList = Object.keys(submitted).filter(k => submitted[k])
+  const submittedList = Object.keys(groups).sort().flatMap(group => {
+    const members = groups[group]
+    return ['round1', 'round2'].flatMap(evalType =>
+      members
+        .filter(name => submitted[`${evalType}|${name}`])
+        .map(name => `${evalType}|${name}`)
+    )
+  })
 
   return (
     <>
@@ -398,32 +423,7 @@ function DanceManagement() {
 
       {tab === 'evaluation' && (
       <div className="dance-wrap" style={{ padding: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0 }}>댄스 평가 관리</h2>
-          <button
-            onClick={() => {
-              if (window.confirm('정말 모든 평가 데이터를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.')) {
-                localStorage.setItem(keyFor('records', selectedClass), JSON.stringify({}))
-                localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify({}))
-                localStorage.setItem(keyFor('open', selectedClass), JSON.stringify({}))
-                loadData()
-                alert('모든 평가 데이터가 초기화되었습니다.')
-              }
-            }}
-            style={{
-              padding: '8px 12px',
-              fontSize: '12px',
-              background: '#fdeceb',
-              color: '#c0392b',
-              border: '1px solid #c0392b',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: '700'
-            }}
-          >
-            🔄 모든 데이터 초기화
-          </button>
-        </div>
+        <h2 style={{ margin: 0, marginBottom: '20px' }}>댄스 평가 관리</h2>
 
         <select
           className="dance-select"
@@ -473,20 +473,34 @@ function DanceManagement() {
         {submittedList.length === 0 ? (
           <div style={{ color: 'var(--mute)', fontSize: '13px' }}>아직 제출한 학생이 없어요.</div>
         ) : (
-          submittedList.map(key => {
-            const [evalType, name] = key.split('|')
-            return (
-              <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', borderBottom: '1px solid var(--line)', alignItems: 'center' }}>
-                <span>{name} — {evalType === 'round1' ? '1차' : '2차'}</span>
-                <button
-                  style={{ padding: '6px 12px', fontSize: '12px', border: '1px solid #c0392b', borderRadius: '6px', background: '#fdeceb', color: '#c0392b', cursor: 'pointer', fontWeight: '700' }}
-                  onClick={() => resetSubmitted(key)}
-                >
-                  ✕ 취소
-                </button>
+          Object.keys(groups).sort().map(group => (
+            <div key={group}>
+              <div style={{ background: '#f5f5f5', fontWeight: '600', padding: '10px 12px', borderTop: '2px solid var(--navy)', fontSize: '13px' }}>
+                {group}
               </div>
-            )
-          })
+              {groups[group].map(name => (
+                ['round1', 'round2'].map(evalType => {
+                  const key = `${evalType}|${name}`
+                  const isSubmitted = submitted[key]
+                  return (
+                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid var(--line)', alignItems: 'center', fontSize: '12px' }}>
+                      <span>{name} — {evalType === 'round1' ? '1차' : '2차'}</span>
+                      <span style={{
+                        padding: '4px 10px',
+                        borderRadius: '12px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        background: isSubmitted ? '#e8f5e9' : '#ffebee',
+                        color: isSubmitted ? '#2f9e6e' : '#c0392b'
+                      }}>
+                        {isSubmitted ? '✓ 제출' : '✕ 미제출'}
+                      </span>
+                    </div>
+                  )
+                })
+              ))}
+            </div>
+          ))
         )}
       </div>
 
@@ -626,15 +640,15 @@ function DanceManagement() {
       {/* 최종 점수 */}
       <div className="dance-card">
         <div className="dance-step-label">최종 점수</div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', tableLayout: 'fixed' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid var(--navy)' }}>
-              <th style={{ textAlign: 'left', padding: '8px', fontWeight: '700' }}>이름</th>
-              <th style={{ textAlign: 'right', padding: '8px', fontWeight: '700' }}>1차</th>
-              <th style={{ textAlign: 'right', padding: '8px', fontWeight: '700' }}>2차</th>
-              <th style={{ textAlign: 'right', padding: '8px', fontWeight: '700' }}>과정</th>
-              <th style={{ textAlign: 'right', padding: '8px', fontWeight: '700' }}>결과</th>
-              <th style={{ textAlign: 'right', padding: '8px', fontWeight: '700' }}>총점</th>
+              <th style={{ textAlign: 'center', padding: '6px', fontWeight: '700', width: '20%', overflow: 'hidden', textOverflow: 'ellipsis' }}>이름</th>
+              <th style={{ textAlign: 'center', padding: '6px', fontWeight: '700', width: '16%' }}>1차</th>
+              <th style={{ textAlign: 'center', padding: '6px', fontWeight: '700', width: '16%' }}>2차</th>
+              <th style={{ textAlign: 'center', padding: '6px', fontWeight: '700', width: '16%' }}>과정</th>
+              <th style={{ textAlign: 'center', padding: '6px', fontWeight: '700', width: '16%' }}>결과</th>
+              <th style={{ textAlign: 'center', padding: '6px', fontWeight: '700', width: '16%' }}>총점</th>
             </tr>
           </thead>
           <tbody>
@@ -642,7 +656,7 @@ function DanceManagement() {
               <Fragment key={group}>
                 {/* 조 제목 */}
                 <tr style={{ background: '#f5f5f5', borderTop: '2px solid var(--navy)' }}>
-                  <td colSpan="6" style={{ padding: '8px 12px', fontWeight: '700', fontSize: '14px' }}>
+                  <td colSpan="6" style={{ padding: '8px 12px', fontWeight: '700', fontSize: '14px', textAlign: 'center' }}>
                     {group}
                   </td>
                 </tr>
@@ -656,6 +670,9 @@ function DanceManagement() {
                   .map(name => {
                     const r1 = avgReceived('round1', name)
                     const r2 = avgReceived('round2', name)
+                    const change1 = getScoreChange('round1', name)
+                    const change2 = getScoreChange('round2', name)
+
                     let procAvg = null
                     if (r1 !== null && r2 !== null) procAvg = (r1 + r2) / 2
                     else if (r1 !== null) procAvg = r1
@@ -666,28 +683,48 @@ function DanceManagement() {
                     const computed = procBand !== null && resultScore ? procBand + resultScore : null
                     const displayVal = overrides[name] !== undefined ? overrides[name] : computed
 
+                    // 과정점수 변화 계산
+                    let procBandChange = null
+                    if (change1 !== null || change2 !== null) {
+                      const newAvg1 = change1 !== null ? (r1 - change1) : r1
+                      const newAvg2 = change2 !== null ? (r2 - change2) : r2
+                      let oldProcAvg = null
+                      if (newAvg1 !== null && newAvg2 !== null) oldProcAvg = (newAvg1 + newAvg2) / 2
+                      else if (newAvg1 !== null) oldProcAvg = newAvg1
+                      else if (newAvg2 !== null) oldProcAvg = newAvg2
+                      const oldProcBand = bandProcess(oldProcAvg)
+                      if (oldProcBand !== procBand) procBandChange = procBand - oldProcBand
+                    }
+
+                    // 총점 변화 (과정점수 변화와 같음)
+                    let totalChange = procBandChange
+
+                    const ScoreDisplay = ({value, change}) => (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                        <span>{value || '-'}</span>
+                        {change !== null && (
+                          <span style={{ fontSize: '10px', color: '#ff6b4a', fontWeight: '700' }}>
+                            ↓{change.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                    )
+
                     return (
                       <tr key={name} style={{ borderBottom: '1px solid var(--line)' }}>
-                        <td style={{ padding: '8px', fontSize: '12px' }}>{name}</td>
-                        <td style={{ textAlign: 'right', padding: '8px' }}>{r1?.toFixed(1) || '-'}</td>
-                        <td style={{ textAlign: 'right', padding: '8px' }}>{r2?.toFixed(1) || '-'}</td>
-                        <td style={{ textAlign: 'right', padding: '8px' }}>{procBand || '-'}</td>
-                        <td style={{ textAlign: 'right', padding: '8px' }}>{resultScore || '-'}</td>
-                        <td style={{ textAlign: 'right', padding: '8px' }}>
-                          <input
-                            type="number"
-                            value={displayVal || ''}
-                            onChange={(e) => setOverride(name, e.target.value)}
-                            placeholder={computed || '12'}
-                            style={{
-                              width: '50px',
-                              padding: '4px',
-                              border: '1px solid var(--line)',
-                              borderRadius: '6px',
-                              textAlign: 'right',
-                              fontSize: '12px'
-                            }}
-                          />
+                        <td style={{ padding: '6px', fontSize: '12px', width: '20%', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</td>
+                        <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>
+                          <ScoreDisplay value={r1?.toFixed(1)} change={change1} />
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>
+                          <ScoreDisplay value={r2?.toFixed(1)} change={change2} />
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>
+                          <ScoreDisplay value={procBand} change={procBandChange} />
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>{resultScore || '-'}</td>
+                        <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>
+                          <ScoreDisplay value={displayVal} change={totalChange} />
                         </td>
                       </tr>
                     )
