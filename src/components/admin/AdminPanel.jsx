@@ -27,19 +27,40 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
 
     // 각 종목별로 시트 추가
     Object.keys(sportGroups).forEach(sport => {
-      const data = sportGroups[sport]
+      const sportStudents = sportGroups[sport]
         .sort((a, b) => {
           if (a.grade !== b.grade) return parseInt(a.grade) - parseInt(b.grade)
           if (a.class !== b.class) return parseInt(a.class) - parseInt(b.class)
           return parseInt(a.number) - parseInt(b.number)
         })
-        .map(student => ({
+
+      // 학생별로 모든 날짜의 활동 시간 계산
+      const data = sportStudents.map(student => {
+        const record = {
           학년: student.grade,
           반: student.class,
           번호: student.number,
           이름: student.name,
           종목: student.sports
-        }))
+        }
+
+        // 모든 날짜의 활동 시간 합산
+        let totalMinutes = 0
+        Object.keys(attendance || {}).forEach(key => {
+          const [date, recordSport, studentId] = key.split('-').slice(0, 3)
+          if (recordSport === sport && studentId === student.id) {
+            const minutes = attendance[key]
+            if (minutes && parseFloat(minutes) > 0) {
+              totalMinutes += parseFloat(minutes)
+            }
+          }
+        })
+
+        record['활동시간(분)'] = totalMinutes
+        record['활동시간(시간)'] = (totalMinutes / 60).toFixed(2)
+
+        return record
+      })
 
       const worksheet = XLSX.utils.json_to_sheet(data)
       XLSX.utils.book_append_sheet(workbook, worksheet, sport)

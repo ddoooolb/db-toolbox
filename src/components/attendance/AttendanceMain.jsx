@@ -38,12 +38,33 @@ function AttendanceMain({ students, attendance, setAttendance }) {
   }
 
   const handleMarkAttendance = (studentId) => {
-    setMinutesStudentId(studentId)
     const dateKey = getDateKey()
     const recordKey = `${dateKey}-${activeSport}-${studentId}`
     const currentMinutes = attendance[recordKey]
-    setMinutesInput(currentMinutes ? String(currentMinutes) : '60')
-    setMinutesModalOpen(true)
+
+    // 아침/점심/방과후: 45분 토글
+    // 직접입력: 모달 열기
+    if (activeTimeSlot === 'direct-input') {
+      setMinutesStudentId(studentId)
+      setMinutesInput(currentMinutes ? String(currentMinutes) : '60')
+      setMinutesModalOpen(true)
+    } else {
+      // 아침/점심/방과후: 45분 토글
+      if (currentMinutes && parseFloat(currentMinutes) > 0) {
+        // 이미 체크됨 → 제거
+        setAttendance(prev => {
+          const newAttendance = {...prev}
+          delete newAttendance[recordKey]
+          return newAttendance
+        })
+      } else {
+        // 미체크 → 45분 추가
+        setAttendance(prev => ({
+          ...prev,
+          [recordKey]: 45
+        }))
+      }
+    }
   }
 
   const filteredStudents = students
@@ -144,9 +165,7 @@ function AttendanceMain({ students, attendance, setAttendance }) {
                     </div>
                     <div className="student-name">{student.name}</div>
                     {isMarked && (
-                      <div className="checkmark">
-                        {hours > 0 ? `${hours}h${mins}m` : `${minutes}m`}
-                      </div>
+                      <div className="checkmark">✓</div>
                     )}
                   </button>
                 )
