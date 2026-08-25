@@ -36,8 +36,12 @@ function DanceManagement() {
   const [submitted, setSubmitted] = useState({})
   const [teacherResults, setTeacherResults] = useState({})
   const [overrides, setOverrides] = useState({})
+  const [resultOverrides, setResultOverrides] = useState({})
   const [flags, setFlags] = useState([])
   const [loading, setLoading] = useState(true)
+  const [resultModalOpen, setResultModalOpen] = useState(false)
+  const [resultModalStudent, setResultModalStudent] = useState(null)
+  const [resultModalValue, setResultModalValue] = useState(0)
 
   useEffect(() => {
     const groupsData = JSON.parse(localStorage.getItem('groups-data') || '{}')
@@ -83,12 +87,14 @@ function DanceManagement() {
       const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
       const teacherResults = JSON.parse(localStorage.getItem(keyFor('teacher-result', selectedClass)) || '{}')
       const overrides = JSON.parse(localStorage.getItem(keyFor('overrides', selectedClass)) || '{}')
+      const resultOverrides = JSON.parse(localStorage.getItem(keyFor('result-overrides', selectedClass)) || '{}')
 
       setOpenState(openState)
       setRecords(records)
       setSubmitted(submitted)
       setTeacherResults(teacherResults)
       setOverrides(overrides)
+      setResultOverrides(resultOverrides)
 
       detectFlags(records)
     } catch (e) {
@@ -680,7 +686,9 @@ function DanceManagement() {
 
                     const procBand = bandProcess(procAvg)
                     const resultScore = teacherResults[group]
-                    const computed = procBand !== null && resultScore ? procBand + resultScore : null
+                    const resultOverride = resultOverrides[name] || 0
+                    const finalResultScore = (resultScore || 0) + resultOverride
+                    const computed = procBand !== null && resultScore ? procBand + finalResultScore : null
                     const displayVal = overrides[name] !== undefined ? overrides[name] : computed
 
                     // 과정점수 변화 계산
@@ -696,19 +704,23 @@ function DanceManagement() {
                       if (oldProcBand !== procBand) procBandChange = procBand - oldProcBand
                     }
 
-                    // 총점 변화 (과정점수 변화와 같음)
-                    let totalChange = procBandChange
+                    // 총점 변화 (과정점수 변화 + 결과평가 조정)
+                    let totalChange = (procBandChange || 0) + (resultOverride || 0)
+                    if (totalChange === 0) totalChange = null
 
                     const ScoreDisplay = ({value, change}) => (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                         <span>{value || '-'}</span>
                         {change !== null && (
                           <span style={{ fontSize: '10px', color: '#ff6b4a', fontWeight: '700' }}>
-                            ↓{change.toFixed(1)}
+                            {change > 0 ? '↑' : '↓'}{Math.abs(change).toFixed(1)}
                           </span>
                         )}
                       </div>
                     )
+
+                    // 결과평가 변화량
+                    const resultChange = resultOverride !== 0 ? resultOverride : null
 
                     return (
                       <tr key={name} style={{ borderBottom: '1px solid var(--line)' }}>
@@ -722,7 +734,37 @@ function DanceManagement() {
                         <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>
                           <ScoreDisplay value={procBand} change={procBandChange} />
                         </td>
-                        <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>{resultScore || '-'}</td>
+                        <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                              <span style={{ fontSize: '12px' }}>{finalResultScore || '-'}</span>
+                              {resultChange !== null && (
+                                <span style={{ fontSize: '10px', color: '#ff6b4a', fontWeight: '700' }}>
+                                  {resultChange > 0 ? '↑' : '↓'}{Math.abs(resultChange)}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => {
+                                setResultModalStudent(name)
+                                setResultModalValue(resultOverride)
+                                setResultModalOpen(true)
+                              }}
+                              style={{
+                                padding: '2px 6px',
+                                fontSize: '11px',
+                                background: '#4a90e2',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '3px',
+                                cursor: 'pointer',
+                                fontWeight: '700'
+                              }}
+                            >
+                              ⚙
+                            </button>
+                          </div>
+                        </td>
                         <td style={{ textAlign: 'center', padding: '6px', width: '16%' }}>
                           <ScoreDisplay value={displayVal} change={totalChange} />
                         </td>
@@ -736,6 +778,135 @@ function DanceManagement() {
         </table>
       </div>
     </div>
+    )}
+
+    {/* 결과평가 조정 모달 */}
+    {resultModalOpen && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }}>
+        <div style={{
+          background: '#fff',
+          borderRadius: '12px',
+          padding: '30px',
+          maxWidth: '400px',
+          width: '90%'
+        }}>
+          <h3 style={{ margin: '0 0 20px 0', color: '#000' }}>
+            {resultModalStudent} - 결과평가 조정
+          </h3>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontWeight: '700', marginBottom: '8px', color: '#000' }}>
+              조정값 (기본값: 0)
+            </label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={() => setResultModalValue(prev => prev - 1)}
+                style={{
+                  padding: '8px 14px',
+                  background: '#e74c3c',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '700',
+                  fontSize: '16px'
+                }}
+              >
+                −
+              </button>
+              <input
+                type="number"
+                value={resultModalValue}
+                onChange={(e) => setResultModalValue(parseInt(e.target.value) || 0)}
+                style={{
+                  padding: '8px',
+                  width: '80px',
+                  textAlign: 'center',
+                  borderRadius: '4px',
+                  border: '2px solid #4a90e2',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  color: '#000',
+                  background: '#ffffff'
+                }}
+              />
+              <button
+                onClick={() => setResultModalValue(prev => prev + 1)}
+                style={{
+                  padding: '8px 14px',
+                  background: '#27ae60',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '700',
+                  fontSize: '16px'
+                }}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => {
+                const newOverrides = {...resultOverrides}
+                if (resultModalValue === 0) {
+                  delete newOverrides[resultModalStudent]
+                } else {
+                  newOverrides[resultModalStudent] = resultModalValue
+                }
+                setResultOverrides(newOverrides)
+                localStorage.setItem(keyFor('result-overrides', selectedClass), JSON.stringify(newOverrides))
+                // 데이터 새로고침 (총점 업데이트)
+                loadData()
+                setResultModalOpen(false)
+              }}
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: '#4a90e2',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                fontSize: '15px'
+              }}
+            >
+              ✓ 저장
+            </button>
+            <button
+              onClick={() => setResultModalOpen(false)}
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: '#f0f0f0',
+                border: '1px solid #ccc',
+                borderRadius: '6px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                fontSize: '15px',
+                color: '#000'
+              }}
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      </div>
     )}
 
     {tab === 'students' && (
