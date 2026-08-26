@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment } from 'react'
 import StudentGroupManagement from '../admin/StudentGroupManagement'
+import { getDanceData, setDanceData } from '../../firestore-utils'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -138,27 +139,31 @@ function DanceManagement() {
 
   // 데이터 로드
   useEffect(() => {
-    loadData()
+    if (selectedClass) {
+      loadData()
+    }
   }, [selectedClass])
 
-  const loadData = () => {
+  const loadData = async () => {
     setLoading(true)
     try {
-      const openState = JSON.parse(localStorage.getItem(keyFor('open', selectedClass)) || '{}')
-      const records = JSON.parse(localStorage.getItem(keyFor('records', selectedClass)) || '{}')
-      const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
-      const teacherResults = JSON.parse(localStorage.getItem(keyFor('teacher-result', selectedClass)) || '{}')
-      const overrides = JSON.parse(localStorage.getItem(keyFor('overrides', selectedClass)) || '{}')
-      const resultOverrides = JSON.parse(localStorage.getItem(keyFor('result-overrides', selectedClass)) || '{}')
+      const [openStateData, recordsData, submittedData, teacherResultsData, overridesData, resultOverridesData] = await Promise.all([
+        getDanceData('open', selectedClass),
+        getDanceData('records', selectedClass),
+        getDanceData('submitted', selectedClass),
+        getDanceData('teacher-result', selectedClass),
+        getDanceData('overrides', selectedClass),
+        getDanceData('result-overrides', selectedClass)
+      ])
 
-      setOpenState(openState)
-      setRecords(records)
-      setSubmitted(submitted)
-      setTeacherResults(teacherResults)
-      setOverrides(overrides)
-      setResultOverrides(resultOverrides)
+      setOpenState(openStateData)
+      setRecords(recordsData)
+      setSubmitted(submittedData)
+      setTeacherResults(teacherResultsData)
+      setOverrides(overridesData)
+      setResultOverrides(resultOverridesData)
 
-      detectFlags(records)
+      detectFlags(recordsData)
     } catch (e) {
       console.error('데이터 로드 실패:', e)
     } finally {
@@ -233,7 +238,7 @@ function DanceManagement() {
     const newState = {...openState}
     newState[type] = !newState[type]
     setOpenState(newState)
-    localStorage.setItem(keyFor('open', selectedClass), JSON.stringify(newState))
+    setDanceData('open', selectedClass, newState)
   }
 
   // 제출 다시 허용

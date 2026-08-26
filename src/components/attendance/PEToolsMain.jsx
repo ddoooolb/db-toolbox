@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AttendanceMain from './AttendanceMain'
 import AdminLogin from '../admin/AdminLogin'
 import AdminPanel from '../admin/AdminPanel'
 import DanceEvaluation from '../dance/DanceEvaluation'
+import { getNestedFirestoreData, setNestedFirestoreData } from '../../firestore-utils'
 import './PEToolsMain.css'
 
 const PETOOLS_MENUS = [
@@ -14,6 +15,24 @@ function PEToolsMain({ students, setStudents }) {
   const [activeMenu, setActiveMenu] = useState('')
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
   const [attendance, setAttendance] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  // Firestore에서 출석 데이터 로드
+  useEffect(() => {
+    const loadAttendance = async () => {
+      const data = await getNestedFirestoreData('data', 'attendance')
+      setAttendance(data || {})
+      setLoading(false)
+    }
+    loadAttendance()
+  }, [])
+
+  // 출석 데이터 변경 시 Firestore에 저장
+  useEffect(() => {
+    if (!loading) {
+      setNestedFirestoreData('data', 'attendance', attendance)
+    }
+  }, [attendance, loading])
 
   if (isAdminLoggedIn) {
     return (
