@@ -7,8 +7,14 @@ import './AdminPanel.css'
 function AdminPanel({ students, setStudents, attendance, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('students')
   const [selectedSport, setSelectedSport] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date()
+    return d.toISOString().split('T')[0]
+  })
+  const [endDate, setEndDate] = useState(() => {
+    const d = new Date()
+    return d.toISOString().split('T')[0]
+  })
 
   const handleExportExcel = () => {
     console.log('선택된 값:', { selectedSport, startDate, endDate })
