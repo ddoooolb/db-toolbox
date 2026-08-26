@@ -121,7 +121,8 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
                       borderRadius: '4px',
                       border: '2px solid #4a90e2',
                       fontSize: '15px',
-                      color: '#000'
+                      color: '#000',
+                      background: '#fff'
                     }}
                   >
                     <option value="">-- 종목을 선택하세요 --</option>
@@ -146,7 +147,8 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
                         borderRadius: '4px',
                         border: '2px solid #4a90e2',
                         fontSize: '15px',
-                        color: '#000'
+                        color: '#000',
+                        background: '#fff'
                       }}
                     />
                   </div>
@@ -164,7 +166,8 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
                         borderRadius: '4px',
                         border: '2px solid #4a90e2',
                         fontSize: '15px',
-                        color: '#000'
+                        color: '#000',
+                        background: '#fff'
                       }}
                     />
                   </div>
