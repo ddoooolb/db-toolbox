@@ -11,6 +11,9 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
   const [endDate, setEndDate] = useState('')
 
   const handleExportExcel = () => {
+    console.log('선택된 값:', { selectedSport, startDate, endDate })
+    console.log('현재 attendance 데이터:', attendance)
+    console.log('attendance의 모든 key:', Object.keys(attendance))
     if (!selectedSport) {
       alert('종목을 선택해주세요')
       return
@@ -28,6 +31,18 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
         return parseInt(a.number) - parseInt(b.number)
       })
 
+    // 날짜 범위의 모든 고유 날짜 추출
+    const allDates = new Set()
+    Object.keys(attendance || {}).forEach(key => {
+      const parts = key.split('-')
+      const date = parts.slice(0, 3).join('-')
+      const recordSport = parts[3]
+      if (recordSport === selectedSport && date >= startDate && date <= endDate) {
+        allDates.add(date)
+      }
+    })
+    const sortedDates = Array.from(allDates).sort()
+
     const data = sportStudents.map(student => {
       const record = {
         학년: student.grade,
@@ -38,22 +53,14 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
       }
 
       let totalMinutes = 0
-      Object.keys(attendance || {}).forEach(key => {
-        const parts = key.split('-')
-        const date = parts.slice(0, 3).join('-')
-        const recordSport = parts[3]
-        const studentId = parts[4]
-
-        if (recordSport === selectedSport && studentId === student.id && date >= startDate && date <= endDate) {
-          const minutes = attendance[key]
-          if (minutes && parseFloat(minutes) > 0) {
-            totalMinutes += parseFloat(minutes)
-          }
-        }
+      sortedDates.forEach(date => {
+        const attendanceKey = `${date}-${selectedSport}-${student.id}`
+        const minutes = attendance[attendanceKey] || 0
+        record[date] = parseFloat(minutes) > 0 ? parseFloat(minutes) : 0
+        totalMinutes += parseFloat(minutes) || 0
       })
 
-      record['활동시간(분)'] = totalMinutes
-      record['활동시간(시간)'] = (totalMinutes / 60).toFixed(2)
+      record['총시간(분)'] = totalMinutes
 
       return record
     })
