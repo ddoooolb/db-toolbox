@@ -36,8 +36,11 @@ function DanceEvaluation() {
   const [openState, setOpenState] = useState({})
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem(keyFor('open', activeClass)) || '{}')
-    setOpenState(saved)
+    if (activeClass) {
+      getDanceData('open', activeClass).then(saved => {
+        setOpenState(saved || {})
+      })
+    }
   }, [activeClass])
 
   useEffect(() => {
@@ -86,9 +89,9 @@ function DanceEvaluation() {
     setStep('who')
   }
 
-  const handleNameSelect = (name) => {
+  const handleNameSelect = async (name) => {
     setMyName(name)
-    const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', activeClass)) || '{}')
+    const submitted = await getDanceData('submitted', activeClass)
     const key = `${evalType}|${name}`
 
     if (submitted[key]) {
@@ -103,7 +106,7 @@ function DanceEvaluation() {
     return groups[myGroup]?.filter(n => n !== myName) || []
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const targets = getTargets()
     if (!targets.every(t => ratings[t])) {
       alert('모든 대상을 평가해주세요.')
