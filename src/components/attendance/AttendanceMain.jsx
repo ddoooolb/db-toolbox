@@ -265,8 +265,7 @@ function AttendanceMain({ students, attendance, setAttendance }) {
                 border: '2px solid #ffc107',
                 fontSize: '16px',
                 fontWeight: '700',
-                color: '#fff',
-                background: '#333'
+                color: '#000'
               }}
             />
             <span style={{ marginLeft: '8px', fontWeight: '600', color: '#000' }}>분</span>

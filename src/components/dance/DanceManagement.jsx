@@ -1,6 +1,5 @@
 import { useState, useEffect, Fragment } from 'react'
 import StudentGroupManagement from '../admin/StudentGroupManagement'
-import { getDanceData, setDanceData } from '../../firestore-utils'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -139,31 +138,27 @@ function DanceManagement() {
 
   // 데이터 로드
   useEffect(() => {
-    if (selectedClass) {
-      loadData()
-    }
+    loadData()
   }, [selectedClass])
 
-  const loadData = async () => {
+  const loadData = () => {
     setLoading(true)
     try {
-      const [openStateData, recordsData, submittedData, teacherResultsData, overridesData, resultOverridesData] = await Promise.all([
-        getDanceData('open', selectedClass),
-        getDanceData('records', selectedClass),
-        getDanceData('submitted', selectedClass),
-        getDanceData('teacher-result', selectedClass),
-        getDanceData('overrides', selectedClass),
-        getDanceData('result-overrides', selectedClass)
-      ])
+      const openState = JSON.parse(localStorage.getItem(keyFor('open', selectedClass)) || '{}')
+      const records = JSON.parse(localStorage.getItem(keyFor('records', selectedClass)) || '{}')
+      const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
+      const teacherResults = JSON.parse(localStorage.getItem(keyFor('teacher-result', selectedClass)) || '{}')
+      const overrides = JSON.parse(localStorage.getItem(keyFor('overrides', selectedClass)) || '{}')
+      const resultOverrides = JSON.parse(localStorage.getItem(keyFor('result-overrides', selectedClass)) || '{}')
 
-      setOpenState(openStateData)
-      setRecords(recordsData)
-      setSubmitted(submittedData)
-      setTeacherResults(teacherResultsData)
-      setOverrides(overridesData)
-      setResultOverrides(resultOverridesData)
+      setOpenState(openState)
+      setRecords(records)
+      setSubmitted(submitted)
+      setTeacherResults(teacherResults)
+      setOverrides(overrides)
+      setResultOverrides(resultOverrides)
 
-      detectFlags(recordsData)
+      detectFlags(records)
     } catch (e) {
       console.error('데이터 로드 실패:', e)
     } finally {
@@ -238,7 +233,7 @@ function DanceManagement() {
     const newState = {...openState}
     newState[type] = !newState[type]
     setOpenState(newState)
-    setDanceData('open', selectedClass, newState)
+    localStorage.setItem(keyFor('open', selectedClass), JSON.stringify(newState))
   }
 
   // 제출 다시 허용
@@ -252,8 +247,7 @@ function DanceManagement() {
     // submitted 삭제
     const newSubmitted = {...submitted}
     delete newSubmitted[key]
-    setSubmitted(newSubmitted)
-    setDanceData('submitted', selectedClass, newSubmitted)
+    localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify(newSubmitted))
 
     // 해당 학생의 평가 기록 삭제
     const newRecords = {...records}
@@ -262,8 +256,7 @@ function DanceManagement() {
       return record.evalType === evalType && record.raterName === name
     })
     keysToDelete.forEach(k => delete newRecords[k])
-    setRecords(newRecords)
-    setDanceData('records', selectedClass, newRecords)
+    localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(newRecords))
 
     // 신뢰도 점검 재계산
     detectFlags(newRecords)
@@ -284,7 +277,7 @@ function DanceManagement() {
       }
     })
     setRecords(newRecords)
-    setDanceData('records', selectedClass, newRecords)
+    localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(newRecords))
     loadData()
   }
 
@@ -297,7 +290,7 @@ function DanceManagement() {
       newResults[group] = score
     }
     setTeacherResults(newResults)
-    setDanceData('teacher-result', selectedClass, newResults)
+    localStorage.setItem(keyFor('teacher-result', selectedClass), JSON.stringify(newResults))
   }
 
   // 오버라이드 입력
@@ -309,7 +302,7 @@ function DanceManagement() {
       newOverrides[name] = Number(value)
     }
     setOverrides(newOverrides)
-    setDanceData('overrides', selectedClass, newOverrides)
+    localStorage.setItem(keyFor('overrides', selectedClass), JSON.stringify(newOverrides))
   }
 
   // 테스트 데이터 생성
@@ -399,11 +392,11 @@ function DanceManagement() {
       testResults[groupName] = existingResults[groupName] || allScores[Math.floor(Math.random() * allScores.length)]
     })
 
-    // Firestore 저장
-    setDanceData('records', testClassId, testRecords)
-    setDanceData('submitted', testClassId, testSubmitted)
-    setDanceData('teacher-result', testClassId, testResults)
-    setDanceData('open', testClassId, { round1: true, round2: true })
+    // localStorage 저장
+    localStorage.setItem(keyFor('records', testClassId), JSON.stringify(testRecords))
+    localStorage.setItem(keyFor('submitted', testClassId), JSON.stringify(testSubmitted))
+    localStorage.setItem(keyFor('teacher-result', testClassId), JSON.stringify(testResults))
+    localStorage.setItem(keyFor('open', testClassId), JSON.stringify({ round1: true, round2: true }))
 
     // classes에도 추가 (반 선택 시 인식 가능하게)
     const newClasses = {...classes, [testClassId]: {...classGroups, label: testClassId}}
@@ -636,7 +629,7 @@ function DanceManagement() {
                       }
                     })
                     setRecords(newRecords)
-                    setDanceData('records', selectedClass, newRecords)
+                    localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(newRecords))
                     loadData()
                   }}
                   style={{
@@ -757,7 +750,7 @@ function DanceManagement() {
                     const resultScore = teacherResults[group]
                     const resultOverride = resultOverrides[name] || 0
                     const finalResultScore = (resultScore || 0) + resultOverride
-                    const computed = procBand !== null && resultScore !== null && resultScore !== undefined ? procBand + finalResultScore : null
+                    const computed = procBand !== null && resultScore ? procBand + finalResultScore : null
                     const displayVal = overrides[name] !== undefined ? overrides[name] : computed
 
                     // 과정점수 변화 계산
@@ -1000,7 +993,7 @@ function DanceManagement() {
                   newOverrides[resultModalStudent] = resultModalValue
                 }
                 setResultOverrides(newOverrides)
-                setDanceData('result-overrides', selectedClass, newOverrides)
+                localStorage.setItem(keyFor('result-overrides', selectedClass), JSON.stringify(newOverrides))
                 // 데이터 새로고침 (총점 업데이트)
                 loadData()
                 setResultModalOpen(false)
