@@ -4,6 +4,7 @@ import './AttendancePublic.css'
 
 function AttendancePublic({ students }) {
   const [attendance, setAttendance] = useState({})
+  console.log('AttendancePublic 렌더링, attendance:', attendance)
 
   return (
     <div className="attendance-public">
