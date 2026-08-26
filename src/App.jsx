@@ -4,10 +4,12 @@ import AttendancePublic from './components/attendance/AttendancePublic'
 import DanceEvaluation from './components/dance/DanceEvaluation'
 import { initialStudents } from './data/students'
 import { initialGroupsData } from './data/groupsData'
+import { initializeAuth } from './firebase'
 import './App.css'
 
 function App() {
   useEffect(() => {
+    initializeAuth()
     const existing = JSON.parse(localStorage.getItem('groups-data') || '{}')
     const merged = { ...existing, ...initialGroupsData }
     localStorage.setItem('groups-data', JSON.stringify(merged))
