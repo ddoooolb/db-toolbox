@@ -14,9 +14,7 @@ export const getAttendanceData = async (classId) => {
     await waitForAuth()
     const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
     const snap = await getDoc(classDoc)
-    const data = snap.data() || {}
-    console.log('출석 데이터 로드:', classId, data)
-    return data
+    return snap.data() || {}
   } catch (error) {
     console.error('출석 데이터 로드 실패:', error)
     return {}
@@ -26,7 +24,6 @@ export const getAttendanceData = async (classId) => {
 export const setAttendanceData = async (classId, data) => {
   try {
     await waitForAuth()
-    console.log('출석 데이터 저장:', classId, data)
     const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
     await setDoc(classDoc, data, { merge: true })
   } catch (error) {

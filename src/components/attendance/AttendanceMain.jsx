@@ -46,7 +46,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
   }, [classId, setAttendance])
 
   useEffect(() => {
-    if (!isInitialLoad.current && Object.keys(attendance).length > 0) {
+    if (!isInitialLoad.current) {
       setAttendanceData(classId, attendance)
     }
   }, [attendance, classId])
