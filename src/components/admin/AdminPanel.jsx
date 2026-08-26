@@ -9,10 +9,12 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
   const [selectedSport, setSelectedSport] = useState('')
   const [startDate, setStartDate] = useState(() => {
     const d = new Date()
+    d.setDate(d.getDate() + 1)
     return d.toISOString().split('T')[0]
   })
   const [endDate, setEndDate] = useState(() => {
     const d = new Date()
+    d.setDate(d.getDate() + 1)
     return d.toISOString().split('T')[0]
   })
 
