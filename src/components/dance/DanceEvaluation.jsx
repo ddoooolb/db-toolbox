@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import DanceManagement from './DanceManagement'
+import { getDanceData, setDanceData } from '../../firestore-utils'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -111,7 +112,7 @@ function DanceEvaluation() {
 
     setIsSubmitting(true)
     try {
-      const records = JSON.parse(localStorage.getItem(keyFor('records', activeClass)) || '{}')
+      const records = await getDanceData('records', activeClass)
       targets.forEach(target => {
         const key = `${evalType}|${myName}|${target}`
         records[key] = {
@@ -123,11 +124,11 @@ function DanceEvaluation() {
           ts: Date.now()
         }
       })
-      localStorage.setItem(keyFor('records', activeClass), JSON.stringify(records))
+      await setDanceData('records', activeClass, records)
 
-      const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', activeClass)) || '{}')
+      const submitted = await getDanceData('submitted', activeClass)
       submitted[`${evalType}|${myName}`] = true
-      localStorage.setItem(keyFor('submitted', activeClass), JSON.stringify(submitted))
+      await setDanceData('submitted', activeClass, submitted)
 
       setSubmitMsg({type: 'ok', text: '제출 완료! 참여해줘서 고마워요 🙌'})
       setTimeout(() => setStep('submitted'), 1500)
