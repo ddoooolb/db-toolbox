@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { getAttendanceData, setAttendanceData } from '../../firestore-utils'
+import { listenAttendanceData, setAttendanceData } from '../../firestore-utils'
 import './AttendanceMain.css'
 
 const TIME_SLOTS = [
@@ -37,13 +37,13 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
   const isInitialLoad = useRef(true)
 
   useEffect(() => {
-    const loadAttendanceData = async () => {
-      const data = await getAttendanceData(classId)
+    isInitialLoad.current = true
+    const unsubscribe = listenAttendanceData(classId, (data) => {
       setAttendance(data)
       isInitialLoad.current = false
-    }
-    loadAttendanceData()
-  }, [classId, setAttendance])
+    })
+    return () => unsubscribe()
+  }, [classId])
 
   useEffect(() => {
     if (!isInitialLoad.current) {

@@ -1,5 +1,5 @@
 import { db, auth } from './firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
 
 const waitForAuth = async (maxRetries = 50) => {
   for (let i = 0; i < maxRetries; i++) {
@@ -29,4 +29,13 @@ export const setAttendanceData = async (classId, data) => {
   } catch (error) {
     console.error('출석 데이터 저장 실패:', error)
   }
+}
+
+export const listenAttendanceData = (classId, onUpdate) => {
+  const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
+  return onSnapshot(classDoc, (snapshot) => {
+    onUpdate(snapshot.data() || {})
+  }, (error) => {
+    console.error('실시간 리스닝 실패:', error)
+  })
 }
