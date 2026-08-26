@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { getAttendanceData, setAttendanceData } from '../../firestore-utils'
 import './AttendanceMain.css'
 
 const TIME_SLOTS = [
@@ -21,7 +22,7 @@ const SPORTS = [
   '농구(남)'
 ]
 
-function AttendanceMain({ students, attendance, setAttendance }) {
+function AttendanceMain({ students, attendance, setAttendance, classId = 'class1' }) {
   const [activeTimeSlot, setActiveTimeSlot] = useState('morning')
   const [activeSport, setActiveSport] = useState('')
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
@@ -32,6 +33,23 @@ function AttendanceMain({ students, attendance, setAttendance }) {
   const [minutesModalOpen, setMinutesModalOpen] = useState(false)
   const [minutesStudentId, setMinutesStudentId] = useState(null)
   const [minutesInput, setMinutesInput] = useState('60')
+
+  const isInitialLoad = useRef(true)
+
+  useEffect(() => {
+    const loadAttendanceData = async () => {
+      const data = await getAttendanceData(classId)
+      setAttendance(data)
+      isInitialLoad.current = false
+    }
+    loadAttendanceData()
+  }, [classId, setAttendance])
+
+  useEffect(() => {
+    if (!isInitialLoad.current && Object.keys(attendance).length > 0) {
+      setAttendanceData(classId, attendance)
+    }
+  }, [attendance, classId])
 
   const getDateKey = () => {
     return selectedDate

@@ -9,13 +9,11 @@ const waitForAuth = async (maxRetries = 50) => {
   throw new Error('인증 타임아웃')
 }
 
-export const getAttendanceData = async () => {
+export const getAttendanceData = async (classId) => {
   try {
     await waitForAuth()
-    const userId = auth.currentUser.uid
-    const userDoc = doc(db, 'users', userId)
-    const attendanceDoc = doc(userDoc, 'data', 'attendance')
-    const snap = await getDoc(attendanceDoc)
+    const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
+    const snap = await getDoc(classDoc)
     return snap.data() || {}
   } catch (error) {
     console.error('출석 데이터 로드 실패:', error)
@@ -23,13 +21,11 @@ export const getAttendanceData = async () => {
   }
 }
 
-export const setAttendanceData = async (data) => {
+export const setAttendanceData = async (classId, data) => {
   try {
     await waitForAuth()
-    const userId = auth.currentUser.uid
-    const userDoc = doc(db, 'users', userId)
-    const attendanceDoc = doc(userDoc, 'data', 'attendance')
-    await setDoc(attendanceDoc, data, { merge: true })
+    const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
+    await setDoc(classDoc, data, { merge: true })
   } catch (error) {
     console.error('출석 데이터 저장 실패:', error)
   }

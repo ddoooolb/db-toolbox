@@ -50,6 +50,7 @@ function PEToolsMain({ students, setStudents }) {
               students={students}
               attendance={attendance}
               setAttendance={setAttendance}
+              classId="class1"
             />
             <div className="attendance-header-actions" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: '100' }}>
               <button
