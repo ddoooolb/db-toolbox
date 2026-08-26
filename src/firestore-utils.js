@@ -1,5 +1,5 @@
 import { db, auth } from './firebase'
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
+import { doc, getDoc, setDoc, onSnapshot, deleteField } from 'firebase/firestore'
 
 const waitForAuth = async (maxRetries = 50) => {
   for (let i = 0; i < maxRetries; i++) {
@@ -25,17 +25,32 @@ export const setAttendanceData = async (classId, data) => {
   try {
     await waitForAuth()
     const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
-    await setDoc(classDoc, data, { merge: true })
+    const updateData = {}
+    Object.entries(data).forEach(([key, value]) => {
+      if (value && value > 0) {
+        updateData[key] = value
+      } else {
+        updateData[key] = deleteField()
+      }
+    })
+    await setDoc(classDoc, updateData, { merge: true })
+    console.log('✓ 출석 데이터 저장 성공')
   } catch (error) {
-    console.error('출석 데이터 저장 실패:', error)
+    console.error('✗ 출석 데이터 저장 실패:', error.code, error.message)
   }
 }
 
-export const listenAttendanceData = (classId, onUpdate) => {
+export const listenAttendanceData = async (classId, onUpdate) => {
+  await waitForAuth()
   const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
-  return onSnapshot(classDoc, (snapshot) => {
-    onUpdate(snapshot.data() || {})
-  }, (error) => {
-    console.error('실시간 리스닝 실패:', error)
-  })
+  try {
+    return onSnapshot(classDoc, (snapshot) => {
+      onUpdate(snapshot.data() || {})
+    }, (error) => {
+      console.error('실시간 리스닝 실패:', error)
+    })
+  } catch (error) {
+    console.error('리스너 설정 실패:', error)
+    return () => {}
+  }
 }

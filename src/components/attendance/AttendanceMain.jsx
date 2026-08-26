@@ -25,7 +25,11 @@ const SPORTS = [
 function AttendanceMain({ students, attendance, setAttendance, classId = 'class1' }) {
   const [activeTimeSlot, setActiveTimeSlot] = useState('morning')
   const [activeSport, setActiveSport] = useState('')
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return d.toISOString().split('T')[0]
+  })
   const [bulkInputDate, setBulkInputDate] = useState(new Date().toISOString().split('T')[0])
   const [bulkInputSport, setBulkInputSport] = useState('')
   const [bulkSelectedStudents, setBulkSelectedStudents] = useState([])
@@ -38,15 +42,18 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
 
   useEffect(() => {
     isInitialLoad.current = true
-    const unsubscribe = listenAttendanceData(classId, (data) => {
+    let unsubscribe = () => {}
+    listenAttendanceData(classId, (data) => {
       setAttendance(data)
       isInitialLoad.current = false
+    }).then(unsub => {
+      unsubscribe = unsub
     })
     return () => unsubscribe()
   }, [classId])
 
   useEffect(() => {
-    if (!isInitialLoad.current) {
+    if (Object.keys(attendance).length >= 0) {
       setAttendanceData(classId, attendance)
     }
   }, [attendance, classId])
@@ -69,12 +76,11 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
     } else {
       // 아침/점심/방과후: 45분 토글
       if (currentMinutes && parseFloat(currentMinutes) > 0) {
-        // 이미 체크됨 → 제거
-        setAttendance(prev => {
-          const newAttendance = {...prev}
-          delete newAttendance[recordKey]
-          return newAttendance
-        })
+        // 이미 체크됨 → 0으로 설정
+        setAttendance(prev => ({
+          ...prev,
+          [recordKey]: 0
+        }))
       } else {
         // 미체크 → 45분 추가
         setAttendance(prev => ({
