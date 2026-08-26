@@ -3,8 +3,19 @@ import { doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where } fro
 
 const getUserDoc = () => {
   const userId = auth.currentUser?.uid
-  if (!userId) throw new Error('인증되지 않음')
+  if (!userId) {
+    console.warn('대기 중: Firebase 인증 초기화')
+    throw new Error('인증되지 않음')
+  }
   return doc(db, 'users', userId)
+}
+
+const waitForAuth = async (maxRetries = 50) => {
+  for (let i = 0; i < maxRetries; i++) {
+    if (auth.currentUser) return auth.currentUser
+    await new Promise(resolve => setTimeout(resolve, 100))
+  }
+  throw new Error('인증 타임아웃')
 }
 
 export const getFirestoreData = async (path) => {
@@ -41,11 +52,18 @@ export const updateFirestoreData = async (path, data) => {
 
 export const getNestedFirestoreData = async (parentPath, childPath) => {
   try {
-    const userDoc = getUserDoc()
-    const pathParts = parentPath.split('/')
-    const parentRef = doc(userDoc, ...pathParts)
-    const childRef = doc(parentRef, ...childPath.split('/'))
-    const snap = await getDoc(childRef)
+    await waitForAuth()
+    const userId = auth.currentUser.uid
+    const fullPath = `users/${userId}/${parentPath}/${childPath}`
+    const parts = fullPath.split('/')
+    let ref = db
+    for (let i = 0; i < parts.length; i += 2) {
+      if (i + 1 < parts.length) {
+        ref = i === 0 ? collection(db, parts[i]) : collection(ref, parts[i])
+        ref = doc(ref, parts[i + 1])
+      }
+    }
+    const snap = await getDoc(ref)
     return snap.data() || {}
   } catch (error) {
     console.error('중첩 데이터 읽기 실패:', error)
@@ -55,11 +73,18 @@ export const getNestedFirestoreData = async (parentPath, childPath) => {
 
 export const setNestedFirestoreData = async (parentPath, childPath, data) => {
   try {
-    const userDoc = getUserDoc()
-    const pathParts = parentPath.split('/')
-    const parentRef = doc(userDoc, ...pathParts)
-    const childRef = doc(parentRef, ...childPath.split('/'))
-    await setDoc(childRef, data, { merge: true })
+    await waitForAuth()
+    const userId = auth.currentUser.uid
+    const fullPath = `users/${userId}/${parentPath}/${childPath}`
+    const parts = fullPath.split('/')
+    let ref = db
+    for (let i = 0; i < parts.length; i += 2) {
+      if (i + 1 < parts.length) {
+        ref = i === 0 ? collection(db, parts[i]) : collection(ref, parts[i])
+        ref = doc(ref, parts[i + 1])
+      }
+    }
+    await setDoc(ref, data, { merge: true })
   } catch (error) {
     console.error('중첩 데이터 저장 실패:', error)
   }

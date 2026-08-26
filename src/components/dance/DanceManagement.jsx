@@ -757,7 +757,7 @@ function DanceManagement() {
                     const resultScore = teacherResults[group]
                     const resultOverride = resultOverrides[name] || 0
                     const finalResultScore = (resultScore || 0) + resultOverride
-                    const computed = procBand !== null && resultScore ? procBand + finalResultScore : null
+                    const computed = procBand !== null && resultScore !== null && resultScore !== undefined ? procBand + finalResultScore : null
                     const displayVal = overrides[name] !== undefined ? overrides[name] : computed
 
                     // 과정점수 변화 계산
