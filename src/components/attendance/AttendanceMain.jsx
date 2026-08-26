@@ -185,7 +185,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                     onClick={() => handleMarkAttendance(student.id)}
                   >
                     <div className="student-info">
-                      {student.grade}-{student.class}-{student.number}
+                      {student.grade}학년 {student.class}반 {student.number}번
                     </div>
                     <div className="student-name">{student.name}</div>
                     {isMarked && (

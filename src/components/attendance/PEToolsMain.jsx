@@ -45,32 +45,33 @@ function PEToolsMain({ students, setStudents }) {
 
       <div className="petools-content">
         {activeMenu === 'attendance' && (
-          <>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setActiveMenu('admin')}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                padding: '10px 16px',
+                background: '#232f52',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '700',
+                fontSize: '13px',
+                zIndex: '10'
+              }}
+            >
+              🔐 관리자
+            </button>
             <AttendanceMain
               students={students}
               attendance={attendance}
               setAttendance={setAttendance}
               classId="class1"
             />
-            <div className="attendance-header-actions" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: '100' }}>
-              <button
-                className="admin-link-button"
-                onClick={() => setActiveMenu('admin')}
-                style={{
-                  padding: '10px 16px',
-                  background: '#232f52',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: '700',
-                  fontSize: '13px'
-                }}
-              >
-                🔐 관리자
-              </button>
-            </div>
-          </>
+          </div>
         )}
 
         {activeMenu === 'dance' && (
