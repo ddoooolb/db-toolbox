@@ -1,28 +1,50 @@
 import { useState, useEffect } from 'react'
 import * as XLSX from 'xlsx'
+import { initialGroupsData } from '../../data/groupsData'
 import './StudentGroupManagement.css'
+
+// groupsData에서 반별 학생 목록 추출
+const extractStudentsFromGroups = () => {
+  const students = []
+  Object.entries(initialGroupsData).forEach(([classId, classGroups]) => {
+    const classParts = classId.match(/(\d+)학년\s*(\d+)반/)
+    if (!classParts) return
+    const grade = classParts[1]
+    const classNum = classParts[2]
+
+    // 각 조의 members에서 직접 학생 정보 추출
+    Object.values(classGroups).forEach(group => {
+      group.members?.forEach(member => {
+        students.push({
+          id: `${classId}-${member.name}`,
+          grade: grade,
+          class: classNum,
+          number: member.number,
+          name: member.name
+        })
+      })
+    })
+  })
+  return students.sort((a, b) => {
+    if (a.class !== b.class) return parseInt(a.class) - parseInt(b.class)
+    return parseInt(a.number) - parseInt(b.number)
+  })
+}
 
 function StudentGroupManagement() {
   const [tab, setTab] = useState('input')
   const [students, setStudents] = useState([])
   const [selectedClass, setSelectedClass] = useState(null)
-  const [groups, setGroups] = useState({})
-  const [groupCount, setGroupCount] = useState(4)
-  const [students2Assign, setStudents2Assign] = useState([])
-  const [draggedStudent, setDraggedStudent] = useState(null)
   const [editForm, setEditForm] = useState({ name: '', number: '', class: '', grade: '' })
   const [editingId, setEditingId] = useState(null)
 
   // 저장된 데이터 로드
   useEffect(() => {
-    const saved = localStorage.getItem('students-data')
-    if (saved) {
-      setStudents(JSON.parse(saved))
-      const classes = [...new Set(JSON.parse(saved).map(s => s.class))]
-      if (classes.length > 0) setSelectedClass(classes[0])
-    }
-    const savedGroups = localStorage.getItem('groups-data')
-    if (savedGroups) setGroups(JSON.parse(savedGroups))
+    // groupsData에서 동료평가용 반별 학생 목록 추출
+    const groupStudents = extractStudentsFromGroups()
+    setStudents(groupStudents)
+    const classes = [...new Set(groupStudents.map(s => s.class))]
+    if (classes.length > 0) setSelectedClass(classes[0])
   }, [])
 
   // 엑셀 업로드 처리
@@ -122,71 +144,6 @@ function StudentGroupManagement() {
     setEditingId(student.id)
   }
 
-  // 반별 학생 필터링
-  const classStudents = students.filter(s => s.class === selectedClass) || []
-
-  // 조 편성 시작
-  const startGrouping = () => {
-    setStudents2Assign([...classStudents].sort(() => Math.random() - 0.5))
-    const newGroups = {}
-    for (let i = 1; i <= groupCount; i++) {
-      newGroups[`${i}조`] = []
-    }
-    setGroups(newGroups)
-  }
-
-  // 드래그 종료
-  const handleDrop = (groupName) => {
-    if (!draggedStudent) return
-    const newGroups = { ...groups }
-    newGroups[groupName] = [...(newGroups[groupName] || []), draggedStudent]
-    setStudents2Assign(students2Assign.filter(s => s.id !== draggedStudent.id))
-    setGroups(newGroups)
-    setDraggedStudent(null)
-  }
-
-  // 학생 제거
-  const removeStudent = (groupName, studentId) => {
-    const student = groups[groupName].find(s => s.id === studentId)
-    const newGroups = { ...groups }
-    newGroups[groupName] = newGroups[groupName].filter(s => s.id !== studentId)
-    setGroups(newGroups)
-    setStudents2Assign([...students2Assign, student])
-  }
-
-  // 조장 선택
-  const setLeader = (groupName, studentId) => {
-    const saved = localStorage.getItem('groups-data')
-    const allGroups = saved ? JSON.parse(saved) : {}
-    if (!allGroups[selectedClass]) allGroups[selectedClass] = {}
-    if (!allGroups[selectedClass][groupName]) {
-      allGroups[selectedClass][groupName] = { members: groups[groupName] || [], leader: null }
-    }
-    allGroups[selectedClass][groupName].leader = studentId
-    localStorage.setItem('groups-data', JSON.stringify(allGroups))
-    alert('조장이 설정되었습니다!')
-  }
-
-  // 조 편성 저장
-  const saveGrouping = () => {
-    const saved = localStorage.getItem('groups-data')
-    const allGroups = saved ? JSON.parse(saved) : {}
-    allGroups[selectedClass] = {}
-    Object.keys(groups).forEach(groupName => {
-      allGroups[selectedClass][groupName] = {
-        members: groups[groupName],
-        leader: null
-      }
-    })
-    localStorage.setItem('groups-data', JSON.stringify(allGroups))
-    alert('조 편성이 저장되었습니다!')
-    setTab('view')
-  }
-
-  // 학생 목록 보기
-  const savedData = localStorage.getItem('groups-data')
-  const classGroups = savedData ? JSON.parse(savedData)[selectedClass] : null
-
   return (
     <div className="sgm-container">
       <h2>📚 학생/조 관리</h2>
@@ -197,18 +154,6 @@ function StudentGroupManagement() {
           onClick={() => setTab('input')}
         >
           1. 데이터 입력
-        </button>
-        <button
-          className={`sgm-tab ${tab === 'assign' ? 'active' : ''}`}
-          onClick={() => setTab('assign')}
-        >
-          2. 조 편성
-        </button>
-        <button
-          className={`sgm-tab ${tab === 'view' ? 'active' : ''}`}
-          onClick={() => setTab('view')}
-        >
-          3. 현황 보기
         </button>
       </nav>
 
@@ -331,18 +276,20 @@ function StudentGroupManagement() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #ddd' }}>
-                    <th style={{ textAlign: 'left', padding: '8px', fontWeight: '700' }}>이름</th>
-                    <th style={{ textAlign: 'left', padding: '8px', fontWeight: '700' }}>번호</th>
-                    <th style={{ textAlign: 'left', padding: '8px', fontWeight: '700' }}>반</th>
+                    <th style={{ textAlign: 'center', padding: '8px', fontWeight: '700' }}>학년</th>
+                    <th style={{ textAlign: 'center', padding: '8px', fontWeight: '700' }}>반</th>
+                    <th style={{ textAlign: 'center', padding: '8px', fontWeight: '700' }}>번호</th>
+                    <th style={{ textAlign: 'center', padding: '8px', fontWeight: '700' }}>이름</th>
                     <th style={{ textAlign: 'center', padding: '8px', fontWeight: '700', width: '80px' }}>작업</th>
                   </tr>
                 </thead>
                 <tbody>
                   {students.map(student => (
                     <tr key={student.id} style={{ borderBottom: '1px solid #ddd' }}>
-                      <td style={{ padding: '8px' }}>{student.name}</td>
-                      <td style={{ padding: '8px' }}>{student.number}</td>
-                      <td style={{ padding: '8px' }}>{student.class}</td>
+                      <td style={{ padding: '8px', textAlign: 'center' }}>{student.grade}</td>
+                      <td style={{ padding: '8px', textAlign: 'center' }}>{student.class}</td>
+                      <td style={{ padding: '8px', textAlign: 'center' }}>{student.number}</td>
+                      <td style={{ padding: '8px', textAlign: 'center' }}>{student.name}</td>
                       <td style={{ padding: '8px', textAlign: 'center', display: 'flex', gap: '4px', justifyContent: 'center' }}>
                         <button
                           onClick={() => startEdit(student)}
@@ -382,262 +329,6 @@ function StudentGroupManagement() {
             </div>
           )}
         </>
-      )}
-
-      {/* 조 편성 탭 */}
-      {tab === 'assign' && (
-        <div className="sgm-card">
-          <h3>조 편성</h3>
-          {students.length === 0 ? (
-            <p style={{ color: '#999' }}>먼저 학생 데이터를 입력하세요.</p>
-          ) : (
-            <>
-              <div style={{ marginBottom: '16px' }}>
-                <label>
-                  반 선택:{' '}
-                  <select
-                    value={selectedClass || ''}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                    style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ddd' }}
-                  >
-                    {[...new Set(students.map(s => s.class))].map(cls => (
-                      <option key={cls} value={cls}>{cls}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              {students2Assign.length === 0 ? (
-                <div style={{ marginBottom: '16px' }}>
-                  <label>
-                    조 개수:{' '}
-                    <input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={groupCount}
-                      onChange={(e) => setGroupCount(Number(e.target.value))}
-                      style={{ width: '60px', padding: '6px', border: '1px solid #ddd' }}
-                    />
-                  </label>
-                  <button
-                    onClick={startGrouping}
-                    style={{
-                      marginLeft: '12px',
-                      padding: '8px 16px',
-                      background: '#ff6b4a',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontWeight: '700'
-                    }}
-                  >
-                    조 편성 시작
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 2fr',
-                    gap: '16px',
-                    marginBottom: '16px'
-                  }}>
-                    {/* 미배치 학생 */}
-                    <div style={{
-                      background: '#f5f5f5',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '2px dashed #ddd'
-                    }}>
-                      <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700' }}>
-                        미배치 ({students2Assign.length}명)
-                      </h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {students2Assign.map(student => (
-                          <div
-                            key={student.id}
-                            draggable
-                            onDragStart={() => setDraggedStudent(student)}
-                            style={{
-                              background: '#fff',
-                              padding: '8px 10px',
-                              borderRadius: '6px',
-                              cursor: 'move',
-                              fontSize: '13px',
-                              border: '1px solid #ddd',
-                              userSelect: 'none'
-                            }}
-                          >
-                            {student.name} ({student.number})
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 조별 목록 */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      {Object.keys(groups).map(groupName => (
-                        <div
-                          key={groupName}
-                          onDragOver={(e) => e.preventDefault()}
-                          onDrop={() => handleDrop(groupName)}
-                          style={{
-                            background: '#fafafa',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            border: '2px solid #ddd',
-                            minHeight: '200px'
-                          }}
-                        >
-                          <h4 style={{ margin: '0 0 10px', fontSize: '13px', fontWeight: '700' }}>
-                            {groupName} ({groups[groupName]?.length || 0}명)
-                          </h4>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            {groups[groupName]?.map((student, idx) => (
-                              <div
-                                key={student.id}
-                                style={{
-                                  background: '#fff',
-                                  padding: '8px 10px',
-                                  borderRadius: '6px',
-                                  fontSize: '12px',
-                                  border: '1px solid #ddd',
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center'
-                                }}
-                              >
-                                <span>{student.name} ({student.number})</span>
-                                <div style={{ display: 'flex', gap: '4px' }}>
-                                  <button
-                                    onClick={() => setLeader(groupName, student.id)}
-                                    style={{
-                                      padding: '2px 6px',
-                                      fontSize: '11px',
-                                      background: '#fff2ee',
-                                      color: '#ff6b4a',
-                                      border: '1px solid #ff6b4a',
-                                      borderRadius: '4px',
-                                      cursor: 'pointer',
-                                      fontWeight: '700'
-                                    }}
-                                  >
-                                    👑
-                                  </button>
-                                  <button
-                                    onClick={() => removeStudent(groupName, student.id)}
-                                    style={{
-                                      padding: '2px 6px',
-                                      fontSize: '11px',
-                                      background: '#fdeceb',
-                                      color: '#c0392b',
-                                      border: '1px solid #c0392b',
-                                      borderRadius: '4px',
-                                      cursor: 'pointer'
-                                    }}
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      onClick={() => {
-                        setStudents2Assign([])
-                        setGroups({})
-                      }}
-                      style={{
-                        padding: '10px 16px',
-                        background: '#f5f5f5',
-                        border: '1px solid #ddd',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontWeight: '700'
-                      }}
-                    >
-                      처음부터
-                    </button>
-                    <button
-                      onClick={saveGrouping}
-                      disabled={students2Assign.length > 0}
-                      style={{
-                        flex: 1,
-                        padding: '10px 16px',
-                        background: students2Assign.length > 0 ? '#ccc' : '#2f9e6e',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: students2Assign.length > 0 ? 'not-allowed' : 'pointer',
-                        fontWeight: '700'
-                      }}
-                    >
-                      저장하기
-                    </button>
-                  </div>
-                </>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* 현황 보기 탭 */}
-      {tab === 'view' && (
-        <div className="sgm-card">
-          <h3>조 편성 현황</h3>
-          {selectedClass && classGroups ? (
-            <>
-              <div style={{ marginBottom: '16px' }}>
-                <label>
-                  반 선택:{' '}
-                  <select
-                    value={selectedClass || ''}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                    style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ddd' }}
-                  >
-                    {Object.keys(classGroups).length > 0 && Object.keys(classGroups).map(cls => (
-                      <option key={cls} value={cls}>{cls}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                {Object.entries(classGroups).map(([groupName, groupData]) => (
-                  <div key={groupName} style={{
-                    background: '#fafafa',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #e4e1da'
-                  }}>
-                    <h4 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: '700', color: '#232f52' }}>
-                      {groupName}
-                    </h4>
-                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px' }}>
-                      {groupData.members?.map(member => (
-                        <li key={member.id} style={{ marginBottom: '6px' }}>
-                          {member.name}
-                          {groupData.leader === member.id ? ' 👑' : ''}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p style={{ color: '#999' }}>저장된 조 편성이 없습니다.</p>
-          )}
-        </div>
       )}
     </div>
   )
