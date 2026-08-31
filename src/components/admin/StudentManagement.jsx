@@ -44,7 +44,8 @@ function StudentManagement({ students, setStudents }) {
     }
 
     try {
-      console.log('저장 시작...')
+      console.log('═══ 학생 저장 시작 ═══')
+      console.log('데이터:', formData)
       if (editingId) {
         // 수정
         console.log('수정 모드')

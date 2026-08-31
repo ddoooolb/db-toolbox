@@ -12,7 +12,15 @@ function App() {
   const [students, setStudents] = useState(initialStudents)
 
   useEffect(() => {
+    console.log('════════════════════════════════')
+    console.log('📱 App.jsx useEffect 시작')
+    console.log('════════════════════════════════')
+
     initializeAuth()
+
+    // 초기 localStorage 상태 확인
+    const savedData = localStorage.getItem('students-data')
+    console.log('📦 localStorage 초기 상태:', savedData ? JSON.parse(savedData).length + '명' : '비어있음')
 
     // Firestore에서 groupsData 실시간 동기화
     const unsubscribeGroups = onSnapshot(
