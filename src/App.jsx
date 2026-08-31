@@ -35,17 +35,18 @@ function App() {
       snapshot.forEach(doc => {
         firestoreStudents.push(doc.data())
       })
-      if (firestoreStudents.length > 0) {
-        // Firestore 데이터가 있으면 사용
-        setStudents(firestoreStudents)
-        localStorage.setItem('students-data', JSON.stringify(firestoreStudents))
-      } else {
-        // Firestore에 없으면 기본 데이터 사용
-        const existing = JSON.parse(localStorage.getItem('students-data') || '[]')
-        const merged = existing.length > 0 ? existing : initialStudents
-        setStudents(merged)
-        localStorage.setItem('students-data', JSON.stringify(merged))
-      }
+
+      // localStorage의 기존 데이터도 함께 로드
+      const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+
+      // 기본 데이터 + localStorage + Firestore를 모두 합침
+      const allStudents = [...initialStudents, ...localStudents, ...firestoreStudents]
+      const uniqueStudents = Array.from(
+        new Map(allStudents.map(s => [s.id, s])).values()
+      )
+
+      setStudents(uniqueStudents)
+      localStorage.setItem('students-data', JSON.stringify(uniqueStudents))
     })
 
     return () => {
