@@ -111,3 +111,61 @@
 .btn-primary:hover {
   background: #5165e8;
 }
+
+/* Export/Statistics Form */
+.export-form {
+  background: var(--bg-soft);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.export-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.export-group:last-child {
+  margin-bottom: 0;
+}
+
+.export-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.export-group select,
+.export-group input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.export-group select:focus,
+.export-group input:focus {
+  outline: none;
+  border-color: var(--vite-text);
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.export-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.date-info {
+  margin-top: 12px;
+  padding: 10px;
+  background: #e8f5e9;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #2f9e6e;
+  font-weight: 600;
+}

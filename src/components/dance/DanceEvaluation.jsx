@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import DanceManagement from './DanceManagement'
+import { initialGroupsData } from '../../data/groupsData'
+import { db } from '../../firebase'
+import { doc, setDoc, collection, onSnapshot } from 'firebase/firestore'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -42,14 +45,34 @@ function DanceEvaluation() {
   useEffect(() => {
     const timer = setTimeout(() => {
       const groupsData = JSON.parse(localStorage.getItem('groups-data') || '{}')
+      // localStorage에 데이터가 없으면 initialGroupsData 사용
+      const dataToUse = Object.keys(groupsData).length > 0 ? groupsData : initialGroupsData
       const builtClasses = {}
-      Object.entries(groupsData).forEach(([classId, classGroups]) => {
+
+      // 클래스를 번호 순서로 정렬
+      const sortedClassIds = Object.keys(dataToUse).sort((a, b) => {
+        const numA = parseInt(a.match(/(\d+)반/)?.[1] || '0')
+        const numB = parseInt(b.match(/(\d+)반/)?.[1] || '0')
+        return numA - numB
+      })
+
+      sortedClassIds.forEach(classId => {
+        const classGroups = dataToUse[classId]
         builtClasses[classId] = {
           label: classId,
           groups: {},
           leaders: {}
         }
-        Object.entries(classGroups).forEach(([groupName, groupData]) => {
+
+        // 조도 번호 순서로 정렬
+        const sortedGroupNames = Object.keys(classGroups).sort((a, b) => {
+          const numA = parseInt(a.match(/(\d+)조/)?.[1] || '0')
+          const numB = parseInt(b.match(/(\d+)조/)?.[1] || '0')
+          return numA - numB
+        })
+
+        sortedGroupNames.forEach(groupName => {
+          const groupData = classGroups[groupName]
           const memberNames = groupData.members.map(m => m.name)
           // 조장도 조원 목록에 포함
           if (groupData.leader && !memberNames.includes(groupData.leader)) {
@@ -102,7 +125,7 @@ function DanceEvaluation() {
     return groups[myGroup]?.filter(n => n !== myName) || []
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const targets = getTargets()
     if (!targets.every(t => ratings[t])) {
       alert('모든 대상을 평가해주세요.')
@@ -112,26 +135,49 @@ function DanceEvaluation() {
     setIsSubmitting(true)
     try {
       const records = JSON.parse(localStorage.getItem(keyFor('records', activeClass)) || '{}')
+      const firebaseUpdates = []
+
       targets.forEach(target => {
         const key = `${evalType}|${myName}|${target}`
-        records[key] = {
+        const record = {
           evalType,
           raterGroup: myGroup,
           raterName: myName,
           target,
           score: ratings[target],
-          ts: Date.now()
+          ts: Date.now(),
+          classId: activeClass
         }
+        records[key] = record
+
+        // Firestore에도 저장
+        const docId = `${activeClass}|${key}`
+        const docRef = doc(db, 'dance-evaluations', docId)
+        firebaseUpdates.push(setDoc(docRef, record))
       })
+
       localStorage.setItem(keyFor('records', activeClass), JSON.stringify(records))
 
       const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', activeClass)) || '{}')
       submitted[`${evalType}|${myName}`] = true
       localStorage.setItem(keyFor('submitted', activeClass), JSON.stringify(submitted))
 
+      // Firestore에 제출 상태도 저장
+      const submittedDocRef = doc(db, 'dance-submitted', `${activeClass}|${evalType}|${myName}`)
+      firebaseUpdates.push(setDoc(submittedDocRef, {
+        classId: activeClass,
+        evalType,
+        studentName: myName,
+        submitted: true,
+        ts: Date.now()
+      }))
+
+      await Promise.all(firebaseUpdates)
+
       setSubmitMsg({type: 'ok', text: '제출 완료! 참여해줘서 고마워요 🙌'})
       setTimeout(() => setStep('submitted'), 1500)
     } catch (e) {
+      console.error('제출 오류:', e)
       setSubmitMsg({type: 'err', text: `제출 실패: ${e.message}`})
     } finally {
       setIsSubmitting(false)
@@ -297,8 +343,12 @@ function DanceEvaluation() {
                     onChange={(e) => e.target.value && handleClassSelect(e.target.value)}
                   >
                     <option value="">선택하세요</option>
-                    {Object.entries(classes).map(([id, data]) => (
-                      <option key={id} value={id}>{data.label}</option>
+                    {Object.keys(classes).sort((a, b) => {
+                      const numA = parseInt(a.match(/(\d+)반/)?.[1] || '0')
+                      const numB = parseInt(b.match(/(\d+)반/)?.[1] || '0')
+                      return numA - numB
+                    }).map(id => (
+                      <option key={id} value={id}>{classes[id].label}</option>
                     ))}
                   </select>
                 </div>
@@ -339,7 +389,11 @@ function DanceEvaluation() {
                   onChange={(e) => setMyGroup(e.target.value)}
                 >
                   <option value="">선택하세요</option>
-                  {Object.keys(groups).map(g => (
+                  {Object.keys(groups).sort((a, b) => {
+                    const numA = parseInt(a.match(/(\d+)조/)?.[1] || '0')
+                    const numB = parseInt(b.match(/(\d+)조/)?.[1] || '0')
+                    return numA - numB
+                  }).map(g => (
                     <option key={g} value={g}>{g} (조장: {leaders[g]})</option>
                   ))}
                 </select>

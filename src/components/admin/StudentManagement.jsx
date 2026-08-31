@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
+import { db } from '../../firebase'
+import { collection, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import './StudentManagement.css'
 
 const SPORTS = [
@@ -32,25 +34,55 @@ function StudentManagement({ students, setStudents }) {
     setFormData({ ...formData, [name]: value })
   }
 
-  const handleAddStudent = (e) => {
+  const handleAddStudent = async (e) => {
     e.preventDefault()
     if (!formData.name || !formData.number || !formData.sports) {
       alert('모든 필드를 입력하세요')
       return
     }
 
-    if (editingId) {
-      setStudents(students.map(s => s.id === editingId ? { ...formData, id: editingId } : s))
-      setEditingId(null)
-    } else {
-      const newStudent = {
-        ...formData,
-        id: Date.now().toString()
-      }
-      setStudents([...students, newStudent])
-    }
+    try {
+      if (editingId) {
+        // 수정
+        const updated = { ...formData, id: editingId }
+        const docRef = doc(db, 'students', editingId)
+        await setDoc(docRef, updated)
+        setStudents(students.map(s => s.id === editingId ? updated : s))
+        setEditingId(null)
+      } else {
+        // 추가
+        const newStudents = []
 
-    setFormData({ grade: '1', class: '1', number: '', name: '', sports: '' })
+        const newStudent = {
+          ...formData,
+          id: Date.now().toString()
+        }
+        newStudents.push(newStudent)
+
+        // 배구(남) 또는 배구(여) 추가 시 배구(남,여)도 자동 추가
+        if (formData.sports === '배구(남)' || formData.sports === '배구(여)') {
+          const pairedStudent = {
+            ...formData,
+            sports: '배구(남,여)',
+            id: (Date.now() + Math.random()).toString()
+          }
+          newStudents.push(pairedStudent)
+        }
+
+        // Firestore에 저장
+        for (const student of newStudents) {
+          const docRef = doc(db, 'students', student.id)
+          await setDoc(docRef, student)
+        }
+
+        setStudents([...students, ...newStudents])
+      }
+
+      setFormData({ grade: '1', class: '1', number: '', name: '', sports: '' })
+    } catch (error) {
+      console.error('저장 오류:', error)
+      alert('저장 중 오류가 발생했습니다.')
+    }
   }
 
   const handleEditStudent = (student) => {
@@ -58,9 +90,17 @@ function StudentManagement({ students, setStudents }) {
     setEditingId(student.id)
   }
 
-  const handleDeleteStudent = (id) => {
+  const handleDeleteStudent = async (id) => {
     if (confirm('학생을 삭제하시겠습니까?')) {
-      setStudents(students.filter(s => s.id !== id))
+      try {
+        // Firestore에서 삭제
+        const docRef = doc(db, 'students', id)
+        await deleteDoc(docRef)
+        setStudents(students.filter(s => s.id !== id))
+      } catch (error) {
+        console.error('삭제 오류:', error)
+        alert('삭제 중 오류가 발생했습니다.')
+      }
     }
   }
 
@@ -82,15 +122,17 @@ function StudentManagement({ students, setStudents }) {
           const worksheet = workbook.Sheets[workbook.SheetNames[0]]
           const jsonData = XLSX.utils.sheet_to_json(worksheet)
 
-          const newStudents = jsonData.map(row => {
+          const newStudents = []
+
+          jsonData.forEach(row => {
             const grade = String(row.grade || row['학년'] || '')
             const classNum = String(row.class || row['반'] || '')
             const number = String(row.number || row['번호'] || '')
             const name = String(row.name || row['이름'] || '')
 
-            if (!grade || !classNum || !number || !name) return null
+            if (!grade || !classNum || !number || !name) return
 
-            return {
+            const student = {
               grade: grade.trim(),
               class: classNum.trim(),
               number: number.trim(),
@@ -98,12 +140,32 @@ function StudentManagement({ students, setStudents }) {
               sports: csvSport,
               id: Date.now().toString() + Math.random()
             }
-          }).filter(Boolean)
+            newStudents.push(student)
 
-          setStudents([...students, ...newStudents])
-          setCsvFile(null)
-          setCsvSport('')
-          alert(`${newStudents.length}명의 학생이 추가되었습니다`)
+            // 배구(남) 또는 배구(여) 추가 시 배구(남,여)도 자동 추가
+            if (csvSport === '배구(남)' || csvSport === '배구(여)') {
+              const pairedStudent = {
+                ...student,
+                sports: '배구(남,여)',
+                id: (Date.now() + Math.random()).toString()
+              }
+              newStudents.push(pairedStudent)
+            }
+          })
+
+          // Firestore에 저장
+          Promise.all(newStudents.map(student => {
+            const docRef = doc(db, 'students', student.id)
+            return setDoc(docRef, student)
+          })).then(() => {
+            setStudents([...students, ...newStudents])
+            setCsvFile(null)
+            setCsvSport('')
+            alert(`${newStudents.length}명의 학생이 추가되었습니다`)
+          }).catch(error => {
+            console.error('저장 오류:', error)
+            alert('저장 중 오류가 발생했습니다.')
+          })
         } catch (error) {
           alert('Excel 파일 처리 중 오류가 발생했습니다')
           console.error(error)
@@ -117,12 +179,14 @@ function StudentManagement({ students, setStudents }) {
           const csv = event.target.result
           const lines = csv.split('\n').filter(line => line.trim())
 
-          const newStudents = lines.slice(1).map(line => {
+          const newStudents = []
+
+          lines.slice(1).forEach(line => {
             const [grade, classNum, number, name] = line.split(',').map(col => col.trim())
 
-            if (!grade || !classNum || !number || !name) return null
+            if (!grade || !classNum || !number || !name) return
 
-            return {
+            const student = {
               grade,
               class: classNum,
               number,
@@ -130,12 +194,32 @@ function StudentManagement({ students, setStudents }) {
               sports: csvSport,
               id: Date.now().toString() + Math.random()
             }
-          }).filter(Boolean)
+            newStudents.push(student)
 
-          setStudents([...students, ...newStudents])
-          setCsvFile(null)
-          setCsvSport('')
-          alert(`${newStudents.length}명의 학생이 추가되었습니다`)
+            // 배구(남) 또는 배구(여) 추가 시 배구(남,여)도 자동 추가
+            if (csvSport === '배구(남)' || csvSport === '배구(여)') {
+              const pairedStudent = {
+                ...student,
+                sports: '배구(남,여)',
+                id: (Date.now() + Math.random()).toString()
+              }
+              newStudents.push(pairedStudent)
+            }
+          })
+
+          // Firestore에 저장
+          Promise.all(newStudents.map(student => {
+            const docRef = doc(db, 'students', student.id)
+            return setDoc(docRef, student)
+          })).then(() => {
+            setStudents([...students, ...newStudents])
+            setCsvFile(null)
+            setCsvSport('')
+            alert(`${newStudents.length}명의 학생이 추가되었습니다`)
+          }).catch(error => {
+            console.error('저장 오류:', error)
+            alert('저장 중 오류가 발생했습니다.')
+          })
         } catch (error) {
           alert('CSV 파일 처리 중 오류가 발생했습니다')
           console.error(error)
@@ -196,32 +280,34 @@ function StudentManagement({ students, setStudents }) {
         <div className="form-row">
           <div className="form-group">
             <label>학년</label>
-            <select name="grade" value={formData.grade} onChange={handleInputChange}>
-              <option value="1">1학년</option>
-              <option value="2">2학년</option>
-              <option value="3">3학년</option>
-            </select>
+            <input
+              type="text"
+              name="grade"
+              value={formData.grade}
+              onChange={handleInputChange}
+              placeholder="예: 3"
+            />
           </div>
 
           <div className="form-group">
             <label>반</label>
-            <select name="class" value={formData.class} onChange={handleInputChange}>
-              {[1, 2, 3, 4, 5].map(i => (
-                <option key={i} value={i}>{i}반</option>
-              ))}
-            </select>
+            <input
+              type="text"
+              name="class"
+              value={formData.class}
+              onChange={handleInputChange}
+              placeholder="예: 1"
+            />
           </div>
 
           <div className="form-group">
             <label>번호</label>
             <input
-              type="number"
+              type="text"
               name="number"
               value={formData.number}
               onChange={handleInputChange}
-              placeholder="번호"
-              min="1"
-              max="50"
+              placeholder="예: 15"
             />
           </div>
 

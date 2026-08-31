@@ -1,6 +1,8 @@
 import { useState, useEffect, Fragment } from 'react'
 import StudentGroupManagement from '../admin/StudentGroupManagement'
 import { initialGroupsData } from '../../data/groupsData'
+import { db } from '../../firebase'
+import { collection, onSnapshot, doc, setDoc, deleteDoc, query, where } from 'firebase/firestore'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -91,34 +93,56 @@ function DanceManagement() {
   const groups = classData?.groups || {}
   const leaders = classData?.leaders || {}
 
-  // 데이터 로드
+  // 데이터 로드 - Firestore 실시간 동기화
   useEffect(() => {
-    loadData()
-  }, [selectedClass])
+    if (!selectedClass) return
 
-  const loadData = () => {
     setLoading(true)
+
+    // Firestore에서 평가 기록 실시간 읽기
+    const unsubEvals = onSnapshot(
+      query(collection(db, 'dance-evaluations'), where('classId', '==', selectedClass)),
+      snapshot => {
+        const firebaseRecords = {}
+        snapshot.forEach(doc => {
+          const data = doc.data()
+          const key = `${data.evalType}|${data.raterName}|${data.target}`
+          firebaseRecords[key] = data
+        })
+
+        // localStorage와 합치기
+        const localRecords = JSON.parse(localStorage.getItem(keyFor('records', selectedClass)) || '{}')
+        const mergedRecords = { ...localRecords, ...firebaseRecords }
+
+        setRecords(mergedRecords)
+        localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(mergedRecords))
+        detectFlags(mergedRecords)
+        setLoading(false)
+      }
+    )
+
+    // localStorage에서 다른 데이터 로드
     try {
       const openState = JSON.parse(localStorage.getItem(keyFor('open', selectedClass)) || '{}')
-      const records = JSON.parse(localStorage.getItem(keyFor('records', selectedClass)) || '{}')
       const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
       const teacherResults = JSON.parse(localStorage.getItem(keyFor('teacher-result', selectedClass)) || '{}')
       const overrides = JSON.parse(localStorage.getItem(keyFor('overrides', selectedClass)) || '{}')
       const resultOverrides = JSON.parse(localStorage.getItem(keyFor('result-overrides', selectedClass)) || '{}')
 
       setOpenState(openState)
-      setRecords(records)
       setSubmitted(submitted)
       setTeacherResults(teacherResults)
       setOverrides(overrides)
       setResultOverrides(resultOverrides)
-
-      detectFlags(records)
     } catch (e) {
       console.error('데이터 로드 실패:', e)
-    } finally {
-      setLoading(false)
     }
+
+    return () => unsubEvals()
+  }, [selectedClass])
+
+  const loadData = () => {
+    // Firestore 실시간 동기화로 처리됨
   }
 
   // 신뢰도 점검
@@ -192,32 +216,48 @@ function DanceManagement() {
   }
 
   // 제출 다시 허용
-  const resetSubmitted = (key) => {
+  const resetSubmitted = async (key) => {
     if (!window.confirm('이 제출을 취소하시겠습니까?\n\n관련된 평가 데이터도 모두 삭제됩니다.')) {
       return
     }
 
     const [evalType, name] = key.split('|')
 
-    // submitted 삭제
-    const newSubmitted = {...submitted}
-    delete newSubmitted[key]
-    localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify(newSubmitted))
+    try {
+      // submitted 삭제
+      const newSubmitted = {...submitted}
+      delete newSubmitted[key]
+      localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify(newSubmitted))
 
-    // 해당 학생의 평가 기록 삭제
-    const newRecords = {...records}
-    const keysToDelete = Object.keys(newRecords).filter(k => {
-      const record = newRecords[k]
-      return record.evalType === evalType && record.raterName === name
-    })
-    keysToDelete.forEach(k => delete newRecords[k])
-    localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(newRecords))
+      // Firestore에서도 제출 상태 삭제
+      const submittedDocRef = doc(db, 'dance-submitted', `${selectedClass}|${evalType}|${name}`)
+      await deleteDoc(submittedDocRef)
 
-    // 신뢰도 점검 재계산
-    detectFlags(newRecords)
+      // 해당 학생의 평가 기록 삭제
+      const newRecords = {...records}
+      const keysToDelete = Object.keys(newRecords).filter(k => {
+        const record = newRecords[k]
+        return record.evalType === evalType && record.raterName === name
+      })
 
-    // 전체 데이터 다시 로드
-    loadData()
+      // Firestore에서 평가 기록 삭제
+      const deletePromises = keysToDelete.map(k => {
+        const docId = `${selectedClass}|${k}`
+        return deleteDoc(doc(db, 'dance-evaluations', docId))
+      })
+
+      keysToDelete.forEach(k => delete newRecords[k])
+      localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(newRecords))
+
+      await Promise.all(deletePromises)
+
+      // 신뢰도 점검 재계산
+      detectFlags(newRecords)
+      alert('제출이 취소되었습니다.')
+    } catch (e) {
+      console.error('취소 오류:', e)
+      alert('취소 중 오류가 발생했습니다.')
+    }
   }
 
   // Flag 토글
@@ -463,8 +503,12 @@ function DanceManagement() {
           style={{ marginBottom: '20px' }}
         >
           <option value="">반을 선택하세요</option>
-          {Object.entries(classes).map(([id, data]) => (
-            <option key={id} value={id}>{data.label}</option>
+          {Object.keys(classes).sort((a, b) => {
+            const numA = parseInt(a.match(/(\d+)반/)?.[1] || '0')
+            const numB = parseInt(b.match(/(\d+)반/)?.[1] || '0')
+            return numA - numB
+          }).map(id => (
+            <option key={id} value={id}>{classes[id].label}</option>
           ))}
           <option value="__test__" style={{ background: '#f0f7ff', fontWeight: '700' }}>📊 테스트 모드 (3학년 1반 샘플)</option>
         </select>
@@ -662,7 +706,11 @@ function DanceManagement() {
       <div className="dance-card">
         <div className="dance-step-label">결과평가 채점 (조별)</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          {Object.keys(groups).map(group => (
+          {Object.keys(groups).sort((a, b) => {
+            const numA = parseInt(a.match(/(\d+)조/)?.[1] || '0')
+            const numB = parseInt(b.match(/(\d+)조/)?.[1] || '0')
+            return numA - numB
+          }).map(group => (
             <div key={group}>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '6px' }}>
                 {group} (조장: {leaders[group]})

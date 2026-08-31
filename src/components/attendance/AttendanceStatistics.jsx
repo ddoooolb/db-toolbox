@@ -97,10 +97,10 @@ function AttendanceStatistics({ students, attendance }) {
     <div className="statistics">
       <h2>출석 통계</h2>
 
-      <div className="sport-selector">
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '700', color: '#000' }}>종목 선택:</label>
-          <select value={selectedSport} onChange={(e) => setSelectedSport(e.target.value)} style={{ padding: '8px', width: '100%', borderRadius: '4px', border: '1px solid #ccc', color: '#000' }}>
+      <div className="export-form">
+        <div className="export-group">
+          <label>종목 선택</label>
+          <select value={selectedSport} onChange={(e) => setSelectedSport(e.target.value)}>
             <option value="">선택하세요</option>
             {SPORTS.map(sport => (
               <option key={sport} value={sport}>{sport}</option>
@@ -108,29 +108,27 @@ function AttendanceStatistics({ students, attendance }) {
           </select>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '700', color: '#000', fontSize: '13px' }}>시작 날짜:</label>
+        <div className="export-dates">
+          <div className="export-group">
+            <label>시작 날짜</label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              style={{ padding: '8px', width: '100%', borderRadius: '4px', border: '1px solid #ccc', color: '#000', background: '#fff' }}
             />
           </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '700', color: '#000', fontSize: '13px' }}>종료 날짜:</label>
+          <div className="export-group">
+            <label>종료 날짜</label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              style={{ padding: '8px', width: '100%', borderRadius: '4px', border: '1px solid #ccc', color: '#000', background: '#fff' }}
             />
           </div>
         </div>
 
         {selectedSport && (startDate || endDate) && (
-          <div style={{ marginTop: '12px', padding: '10px', background: '#e8f5e9', borderRadius: '4px', fontSize: '12px', color: '#2f9e6e', fontWeight: '600' }}>
+          <div className="date-info">
             📊 {startDate && `${startDate}부터`} {endDate && `${endDate}까지`} 데이터
           </div>
         )}

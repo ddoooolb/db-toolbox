@@ -2344,13 +2344,6 @@ export const initialGroupsData = {
     "1조": {
       "members": [
         {
-          "id": 0.0140978253,
-          "name": "문서영",
-          "number": "9",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
           "id": 0.5340646727,
           "name": "안나경",
           "number": "17",
@@ -2358,30 +2351,16 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.4888779959,
-          "name": "조아름",
-          "number": "27",
+          "id": 0.1297623404,
+          "name": "현지원",
+          "number": "31",
           "class": "3-8",
           "grade": 3
         },
         {
-          "id": 0.7908764018,
-          "name": "안도현",
-          "number": "18",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.0115423444,
-          "name": "박시율",
-          "number": "12",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.2914657227,
-          "name": "강윤식",
-          "number": "1",
+          "id": 0.9565013314,
+          "name": "송시현",
+          "number": "16",
           "class": "3-8",
           "grade": 3
         },
@@ -2393,6 +2372,13 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
+          "id": 0.6489643292,
+          "name": "박한이",
+          "number": "14",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
           "id": 0.580203433,
           "name": "구현우",
           "number": "2",
@@ -2400,9 +2386,56 @@ export const initialGroupsData = {
           "grade": 3
         }
       ],
-      "leader": "문서영"
+      "leader": "안나경"
     },
     "2조": {
+      "members": [
+        {
+          "id": 0.0140978253,
+          "name": "문서영",
+          "number": "9",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.1126899772,
+          "name": "김도현",
+          "number": "3",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.8721574945,
+          "name": "김범찬",
+          "number": "5",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.127726419,
+          "name": "박지율",
+          "number": "13",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.0115423444,
+          "name": "박시율",
+          "number": "12",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.7908764018,
+          "name": "안도현",
+          "number": "18",
+          "class": "3-8",
+          "grade": 3
+        }
+      ],
+      "leader": "문서영"
+    },
+    "3조": {
       "members": [
         {
           "id": 0.862728432,
@@ -2419,81 +2452,6 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.2729660185,
-          "name": "장유림",
-          "number": "23",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.6465114908,
-          "name": "이원",
-          "number": "21",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.1126899772,
-          "name": "김도현",
-          "number": "3",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.3473261679,
-          "name": "김하준",
-          "number": "8",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.1297623404,
-          "name": "현지원",
-          "number": "31",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.3917346768,
-          "name": "김하원",
-          "number": "7",
-          "class": "3-8",
-          "grade": 3
-        }
-      ],
-      "leader": "최희연"
-    },
-    "3조": {
-      "members": [
-        {
-          "id": 0.8903999241,
-          "name": "이하늘",
-          "number": "22",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.8721574945,
-          "name": "김범찬",
-          "number": "5",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.9565013314,
-          "name": "송시현",
-          "number": "16",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.5769454943,
-          "name": "변정연",
-          "number": "15",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
           "id": 0.8673946037,
           "name": "정민우",
           "number": "25",
@@ -2501,49 +2459,9 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.8635631806,
-          "name": "김민솔",
-          "number": "4",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
           "id": 0.8430119549,
           "name": "한재희",
           "number": "30",
-          "class": "3-8",
-          "grade": 3
-        }
-      ],
-      "leader": "이하늘"
-    },
-    "4조": {
-      "members": [
-        {
-          "id": 0.4398804439,
-          "name": "엄서율",
-          "number": "20",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.8525554159,
-          "name": "김아린",
-          "number": "6",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.6377232835,
-          "name": "정시아",
-          "number": "26",
-          "class": "3-8",
-          "grade": 3
-        },
-        {
-          "id": 0.6489643292,
-          "name": "박한이",
-          "number": "14",
           "class": "3-8",
           "grade": 3
         },
@@ -2560,11 +2478,98 @@ export const initialGroupsData = {
           "number": "19",
           "class": "3-8",
           "grade": 3
+        }
+      ],
+      "leader": "최희연"
+    },
+    "4조": {
+      "members": [
+        {
+          "id": 0.4398804439,
+          "name": "엄서율",
+          "number": "20",
+          "class": "3-8",
+          "grade": 3
         },
         {
-          "id": 0.127726419,
-          "name": "박지율",
-          "number": "13",
+          "id": 0.6465114908,
+          "name": "이원",
+          "number": "21",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.3473261679,
+          "name": "김하준",
+          "number": "8",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.8635631806,
+          "name": "김민솔",
+          "number": "4",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.8525554159,
+          "name": "김아린",
+          "number": "6",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.2914657227,
+          "name": "강윤식",
+          "number": "1",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.4888779959,
+          "name": "조아름",
+          "number": "27",
+          "class": "3-8",
+          "grade": 3
+        }
+      ],
+      "leader": "엄서율"
+    },
+    "5조": {
+      "members": [
+        {
+          "id": 0.8903999241,
+          "name": "이하늘",
+          "number": "22",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.2729660185,
+          "name": "장유림",
+          "number": "23",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.3917346768,
+          "name": "김하원",
+          "number": "7",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.5769454943,
+          "name": "변정연",
+          "number": "15",
+          "class": "3-8",
+          "grade": 3
+        },
+        {
+          "id": 0.6377232835,
+          "name": "정시아",
+          "number": "26",
           "class": "3-8",
           "grade": 3
         },
@@ -2576,7 +2581,7 @@ export const initialGroupsData = {
           "grade": 3
         }
       ],
-      "leader": "엄서율"
+      "leader": "이하늘"
     }
   },
   "3학년 9반": {

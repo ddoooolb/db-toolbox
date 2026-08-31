@@ -121,24 +121,12 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
           {activeMenu === 'export' && (
             <div className="menu-section">
               <h2>엑셀 내보내기</h2>
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '8px', color: '#000' }}>
-                    종목 선택
-                  </label>
+              <div className="export-form">
+                <div className="export-group">
+                  <label>종목 선택</label>
                   <select
                     value={selectedSport}
                     onChange={(e) => setSelectedSport(e.target.value)}
-                    style={{
-                      padding: '10px',
-                      width: '100%',
-                      maxWidth: '300px',
-                      borderRadius: '4px',
-                      border: '2px solid #4a90e2',
-                      fontSize: '15px',
-                      color: '#000',
-                      background: '#fff'
-                    }}
                   >
                     <option value="">-- 종목을 선택하세요 --</option>
                     {Array.from(new Set(students.map(s => s.sports))).sort().map(sport => (
@@ -147,43 +135,21 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
                   </select>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: '700', marginBottom: '8px', color: '#000' }}>
-                      시작 날짜
-                    </label>
+                <div className="export-dates">
+                  <div className="export-group">
+                    <label>시작 날짜</label>
                     <input
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      style={{
-                        padding: '10px',
-                        width: '100%',
-                        borderRadius: '4px',
-                        border: '2px solid #4a90e2',
-                        fontSize: '15px',
-                        color: '#000',
-                        background: '#fff'
-                      }}
                     />
                   </div>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: '700', marginBottom: '8px', color: '#000' }}>
-                      종료 날짜
-                    </label>
+                  <div className="export-group">
+                    <label>종료 날짜</label>
                     <input
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      style={{
-                        padding: '10px',
-                        width: '100%',
-                        borderRadius: '4px',
-                        border: '2px solid #4a90e2',
-                        fontSize: '15px',
-                        color: '#000',
-                        background: '#fff'
-                      }}
                     />
                   </div>
                 </div>

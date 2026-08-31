@@ -9,27 +9,49 @@ import { collection, onSnapshot } from 'firebase/firestore'
 import './App.css'
 
 function App() {
+  const [students, setStudents] = useState(initialStudents)
+
   useEffect(() => {
     initializeAuth()
 
     // Firestore에서 groupsData 실시간 동기화
-    const unsubscribe = onSnapshot(collection(db, 'groups'), snapshot => {
+    const unsubscribeGroups = onSnapshot(collection(db, 'groups'), snapshot => {
       const firestoreGroups = {}
       snapshot.forEach(doc => {
         firestoreGroups[doc.id] = doc.data()
       })
       if (Object.keys(firestoreGroups).length > 0) {
-        // Firestore 데이터가 있으면 우선 사용
         localStorage.setItem('groups-data', JSON.stringify(firestoreGroups))
       } else {
-        // Firestore에 없으면 기본 데이터 사용
         const existing = JSON.parse(localStorage.getItem('groups-data') || '{}')
         const merged = { ...existing, ...initialGroupsData }
         localStorage.setItem('groups-data', JSON.stringify(merged))
       }
     })
 
-    return () => unsubscribe()
+    // Firestore에서 students 데이터 실시간 동기화
+    const unsubscribeStudents = onSnapshot(collection(db, 'students'), snapshot => {
+      const firestoreStudents = []
+      snapshot.forEach(doc => {
+        firestoreStudents.push(doc.data())
+      })
+      if (firestoreStudents.length > 0) {
+        // Firestore 데이터가 있으면 사용
+        setStudents(firestoreStudents)
+        localStorage.setItem('students-data', JSON.stringify(firestoreStudents))
+      } else {
+        // Firestore에 없으면 기본 데이터 사용
+        const existing = JSON.parse(localStorage.getItem('students-data') || '[]')
+        const merged = existing.length > 0 ? existing : initialStudents
+        setStudents(merged)
+        localStorage.setItem('students-data', JSON.stringify(merged))
+      }
+    })
+
+    return () => {
+      unsubscribeGroups()
+      unsubscribeStudents()
+    }
   }, [])
 
   const searchParams = new URLSearchParams(window.location.search)
@@ -37,7 +59,6 @@ function App() {
   const danceMode = searchParams.get('mode') === 'dance'
 
   const [activeTab, setActiveTab] = useState('petools')
-  const [students, setStudents] = useState(initialStudents)
 
   // 출석 전용 모드
   if (attendanceMode) {
