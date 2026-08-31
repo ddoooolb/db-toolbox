@@ -15,16 +15,9 @@ const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app, '(default)')
 export const auth = getAuth(app)
 
-console.log('Firebase Firestore 초기화:', {
-  projectId: firebaseConfig.projectId
-})
-
-enableIndexedDbPersistence(db).catch(err => {
-  if (err.code === 'failed-precondition') {
-    console.log('Multiple tabs, persistence in one tab only')
-  } else if (err.code === 'unimplemented') {
-    console.log('Browser does not support persistence')
-  }
+console.log('✓ Firebase Firestore 초기화:', {
+  projectId: firebaseConfig.projectId,
+  database: '(default)'
 })
 
 export const initializeAuth = async () => {
