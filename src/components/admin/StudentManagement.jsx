@@ -49,8 +49,23 @@ function StudentManagement({ students, setStudents }) {
         // 수정
         console.log('수정 모드')
         const updated = { ...formData, id: editingId }
+
+        // localStorage에 저장
+        const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+        const idx = savedStudents.findIndex(s => s.id === editingId)
+        if (idx >= 0) {
+          savedStudents[idx] = updated
+        } else {
+          savedStudents.push(updated)
+        }
+        localStorage.setItem('students-data', JSON.stringify(savedStudents))
+        console.log('✓ localStorage 수정 저장')
+
+        // Firestore에 저장
         const docRef = doc(db, 'students', editingId)
         await setDoc(docRef, updated)
+        console.log('✓ Firestore 수정 저장')
+
         setStudents(students.map(s => s.id === editingId ? updated : s))
         setEditingId(null)
       } else {
@@ -105,12 +120,20 @@ function StudentManagement({ students, setStudents }) {
   const handleDeleteStudent = async (id) => {
     if (confirm('학생을 삭제하시겠습니까?')) {
       try {
+        // localStorage에서 삭제
+        const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+        const filtered = savedStudents.filter(s => s.id !== id)
+        localStorage.setItem('students-data', JSON.stringify(filtered))
+        console.log('✓ localStorage 삭제')
+
         // Firestore에서 삭제
         const docRef = doc(db, 'students', id)
         await deleteDoc(docRef)
+        console.log('✓ Firestore 삭제')
+
         setStudents(students.filter(s => s.id !== id))
       } catch (error) {
-        console.error('삭제 오류:', error)
+        console.error('✗ 삭제 오류:', error)
         alert('삭제 중 오류가 발생했습니다.')
       }
     }

@@ -15,19 +15,26 @@ function App() {
     initializeAuth()
 
     // Firestore에서 groupsData 실시간 동기화
-    const unsubscribeGroups = onSnapshot(collection(db, 'groups'), snapshot => {
-      const firestoreGroups = {}
-      snapshot.forEach(doc => {
-        firestoreGroups[doc.id] = doc.data()
-      })
-      if (Object.keys(firestoreGroups).length > 0) {
-        localStorage.setItem('groups-data', JSON.stringify(firestoreGroups))
-      } else {
-        const existing = JSON.parse(localStorage.getItem('groups-data') || '{}')
-        const merged = { ...existing, ...initialGroupsData }
-        localStorage.setItem('groups-data', JSON.stringify(merged))
+    const unsubscribeGroups = onSnapshot(
+      collection(db, 'groups'),
+      snapshot => {
+        const firestoreGroups = {}
+        snapshot.forEach(doc => {
+          firestoreGroups[doc.id] = doc.data()
+        })
+        console.log('✓ Firestore groups 로드:', Object.keys(firestoreGroups).length)
+        if (Object.keys(firestoreGroups).length > 0) {
+          localStorage.setItem('groups-data', JSON.stringify(firestoreGroups))
+        } else {
+          const existing = JSON.parse(localStorage.getItem('groups-data') || '{}')
+          const merged = { ...existing, ...initialGroupsData }
+          localStorage.setItem('groups-data', JSON.stringify(merged))
+        }
+      },
+      error => {
+        console.error('✗ Firestore groups 오류:', error.code, error.message)
       }
-    })
+    )
 
     // Firestore에서 students 데이터 실시간 동기화
     const unsubscribeStudents = onSnapshot(
