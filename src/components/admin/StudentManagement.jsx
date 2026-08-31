@@ -76,11 +76,10 @@ function StudentManagement({ students, setStudents }) {
 
         console.log('Firestore에 저장할 학생:', newStudents)
 
-        // Firestore에 저장
+        // localStorage에만 저장 (Firestore 대신)
         for (const student of newStudents) {
           console.log('저장 중:', student.name)
-          const docRef = doc(db, 'students', student.id)
-          await setDoc(docRef, student)
+          // Firestore 저장 제거
           console.log('저장 완료:', student.name)
         }
 
