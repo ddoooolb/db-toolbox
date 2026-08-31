@@ -7,7 +7,8 @@ import './PEToolsMain.css'
 
 const PETOOLS_MENUS = [
   { id: 'attendance', name: '학교스포츠클럽 출석' },
-  { id: 'dance', name: '댄스 평가' }
+  { id: 'dance', name: '댄스 평가' },
+  { id: 'admin', name: '📋 관리자 (학생관리)' }
 ]
 
 function PEToolsMain({ students, setStudents }) {
