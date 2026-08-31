@@ -66,16 +66,21 @@ function StudentManagement({ students, setStudents }) {
 
         console.log('Firestore에 저장할 학생:', newStudents)
 
+        // localStorage에 저장
+        const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+        const allSavedStudents = [...savedStudents, ...newStudents]
+        localStorage.setItem('students-data', JSON.stringify(allSavedStudents))
+        console.log('✓ localStorage 저장:', allSavedStudents.length)
+
         // Firestore에 저장
         for (const student of newStudents) {
           console.log('저장 중:', student.name, student.id)
           try {
             const docRef = doc(db, 'students', student.id)
             await setDoc(docRef, student)
-            console.log('✓ 저장 완료:', student.name)
+            console.log('✓ Firestore 저장 완료:', student.name)
           } catch (error) {
             console.error('✗ Firestore 저장 오류:', student.name, error.code, error.message)
-            throw error
           }
         }
 
@@ -151,6 +156,12 @@ function StudentManagement({ students, setStudents }) {
 
           })
 
+          // localStorage에 먼저 저장
+          const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+          const allSavedStudents = [...savedStudents, ...newStudents]
+          localStorage.setItem('students-data', JSON.stringify(allSavedStudents))
+          console.log('✓ CSV localStorage 저장:', allSavedStudents.length)
+
           // Firestore에 저장
           Promise.all(newStudents.map(student => {
             const docRef = doc(db, 'students', student.id)
@@ -161,7 +172,7 @@ function StudentManagement({ students, setStudents }) {
             setCsvSport('')
             alert(`${newStudents.length}명의 학생이 추가되었습니다`)
           }).catch(error => {
-            console.error('저장 오류:', error)
+            console.error('CSV Firestore 저장 오류:', error)
             alert('저장 중 오류가 발생했습니다.')
           })
         } catch (error) {
@@ -196,6 +207,12 @@ function StudentManagement({ students, setStudents }) {
 
           })
 
+          // localStorage에 먼저 저장
+          const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+          const allSavedStudents = [...savedStudents, ...newStudents]
+          localStorage.setItem('students-data', JSON.stringify(allSavedStudents))
+          console.log('✓ CSV localStorage 저장:', allSavedStudents.length)
+
           // Firestore에 저장
           Promise.all(newStudents.map(student => {
             const docRef = doc(db, 'students', student.id)
@@ -206,7 +223,7 @@ function StudentManagement({ students, setStudents }) {
             setCsvSport('')
             alert(`${newStudents.length}명의 학생이 추가되었습니다`)
           }).catch(error => {
-            console.error('저장 오류:', error)
+            console.error('CSV Firestore 저장 오류:', error)
             alert('저장 중 오류가 발생했습니다.')
           })
         } catch (error) {
