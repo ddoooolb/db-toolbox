@@ -30,24 +30,33 @@ function App() {
     })
 
     // Firestore에서 students 데이터 실시간 동기화
-    const unsubscribeStudents = onSnapshot(collection(db, 'students'), snapshot => {
-      const firestoreStudents = []
-      snapshot.forEach(doc => {
-        firestoreStudents.push(doc.data())
-      })
+    const unsubscribeStudents = onSnapshot(
+      collection(db, 'students'),
+      snapshot => {
+        const firestoreStudents = []
+        snapshot.forEach(doc => {
+          firestoreStudents.push(doc.data())
+        })
 
-      // localStorage의 기존 데이터도 함께 로드
-      const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+        console.log('✓ Firestore students 로드:', firestoreStudents.length)
 
-      // 기본 데이터 + localStorage + Firestore를 모두 합침
-      const allStudents = [...initialStudents, ...localStudents, ...firestoreStudents]
-      const uniqueStudents = Array.from(
-        new Map(allStudents.map(s => [s.id, s])).values()
-      )
+        // localStorage의 기존 데이터도 함께 로드
+        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
 
-      setStudents(uniqueStudents)
-      localStorage.setItem('students-data', JSON.stringify(uniqueStudents))
-    })
+        // 기본 데이터 + localStorage + Firestore를 모두 합침
+        const allStudents = [...initialStudents, ...localStudents, ...firestoreStudents]
+        const uniqueStudents = Array.from(
+          new Map(allStudents.map(s => [s.id, s])).values()
+        )
+
+        console.log('✓ 최종 학생 수:', uniqueStudents.length)
+        setStudents(uniqueStudents)
+        localStorage.setItem('students-data', JSON.stringify(uniqueStudents))
+      },
+      error => {
+        console.error('✗ Firestore students 오류:', error.code, error.message)
+      }
+    )
 
     return () => {
       unsubscribeGroups()

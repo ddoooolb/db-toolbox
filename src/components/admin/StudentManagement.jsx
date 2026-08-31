@@ -64,31 +64,22 @@ function StudentManagement({ students, setStudents }) {
         }
         newStudents.push(newStudent)
 
-        // 배구(남) 또는 배구(여) 추가 시 배구(남,여)도 자동 추가
-        if (formData.sports === '배구(남)' || formData.sports === '배구(여)') {
-          const pairedStudent = {
-            ...formData,
-            sports: '배구(남,여)',
-            id: (Date.now() + Math.random()).toString()
-          }
-          newStudents.push(pairedStudent)
-        }
-
         console.log('Firestore에 저장할 학생:', newStudents)
 
         // Firestore에 저장
         for (const student of newStudents) {
-          console.log('저장 중:', student.name)
+          console.log('저장 중:', student.name, student.id)
           try {
             const docRef = doc(db, 'students', student.id)
             await setDoc(docRef, student)
-            console.log('저장 완료:', student.name)
+            console.log('✓ 저장 완료:', student.name)
           } catch (error) {
-            console.error('Firestore 저장 오류:', student.name, error)
+            console.error('✗ Firestore 저장 오류:', student.name, error.code, error.message)
+            throw error
           }
         }
 
-        console.log('상태 업데이트')
+        console.log('✓ 상태 업데이트')
         setStudents([...students, ...newStudents])
       }
 
@@ -158,15 +149,6 @@ function StudentManagement({ students, setStudents }) {
             }
             newStudents.push(student)
 
-            // 배구(남) 또는 배구(여) 추가 시 배구(남,여)도 자동 추가
-            if (csvSport === '배구(남)' || csvSport === '배구(여)') {
-              const pairedStudent = {
-                ...student,
-                sports: '배구(남,여)',
-                id: (Date.now() + Math.random()).toString()
-              }
-              newStudents.push(pairedStudent)
-            }
           })
 
           // Firestore에 저장
@@ -212,15 +194,6 @@ function StudentManagement({ students, setStudents }) {
             }
             newStudents.push(student)
 
-            // 배구(남) 또는 배구(여) 추가 시 배구(남,여)도 자동 추가
-            if (csvSport === '배구(남)' || csvSport === '배구(여)') {
-              const pairedStudent = {
-                ...student,
-                sports: '배구(남,여)',
-                id: (Date.now() + Math.random()).toString()
-              }
-              newStudents.push(pairedStudent)
-            }
           })
 
           // Firestore에 저장
