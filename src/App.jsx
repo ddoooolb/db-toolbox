@@ -62,6 +62,14 @@ function App() {
       },
       error => {
         console.error('✗ Firestore students 오류:', error.code, error.message)
+        // Firestore 실패 시에도 localStorage 데이터로 화면 표시
+        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+        const allStudents = [...initialStudents, ...localStudents]
+        const uniqueStudents = Array.from(
+          new Map(allStudents.map(s => [s.id, s])).values()
+        )
+        console.log('📌 Firestore 실패, localStorage로 복구:', uniqueStudents.length)
+        setStudents(uniqueStudents)
       }
     )
 
