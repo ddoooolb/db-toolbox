@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import DanceManagement from './DanceManagement'
 import { initialGroupsData } from '../../data/groupsData'
-import { database } from '../../firebase'
-import { ref, set } from 'firebase/database'
+import { db } from '../../firebase'
+import { doc, setDoc, collection, onSnapshot } from 'firebase/firestore'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -150,9 +150,10 @@ function DanceEvaluation() {
         }
         records[key] = record
 
-        // Realtime Database에도 저장
-        const evalRef = ref(database, `dance-evaluations/${activeClass}/${key}`)
-        firebaseUpdates.push(set(evalRef, record))
+        // Firestore에도 저장
+        const docId = `${activeClass}|${key}`
+        const docRef = doc(db, 'dance-evaluations', docId)
+        firebaseUpdates.push(setDoc(docRef, record))
       })
 
       localStorage.setItem(keyFor('records', activeClass), JSON.stringify(records))
@@ -161,9 +162,9 @@ function DanceEvaluation() {
       submitted[`${evalType}|${myName}`] = true
       localStorage.setItem(keyFor('submitted', activeClass), JSON.stringify(submitted))
 
-      // Realtime Database에 제출 상태도 저장
-      const submittedRef = ref(database, `dance-submitted/${activeClass}/${evalType}/${myName}`)
-      firebaseUpdates.push(set(submittedRef, {
+      // Firestore에 제출 상태도 저장
+      const submittedDocRef = doc(db, 'dance-submitted', `${activeClass}|${evalType}|${myName}`)
+      firebaseUpdates.push(setDoc(submittedDocRef, {
         classId: activeClass,
         evalType,
         studentName: myName,
