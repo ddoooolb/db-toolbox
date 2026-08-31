@@ -1,8 +1,8 @@
 import { useState, useEffect, Fragment } from 'react'
 import StudentGroupManagement from '../admin/StudentGroupManagement'
 import { initialGroupsData } from '../../data/groupsData'
-import { db } from '../../firebase'
-import { collection, onSnapshot, doc, setDoc, deleteDoc, query, where } from 'firebase/firestore'
+import { database } from '../../firebase'
+import { ref, onValue, remove } from 'firebase/database'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -93,22 +93,24 @@ function DanceManagement() {
   const groups = classData?.groups || {}
   const leaders = classData?.leaders || {}
 
-  // 데이터 로드 - Firestore 실시간 동기화
+  // 데이터 로드 - Realtime Database 실시간 동기화
   useEffect(() => {
     if (!selectedClass) return
 
     setLoading(true)
 
-    // Firestore에서 평가 기록 실시간 읽기
-    const unsubEvals = onSnapshot(
-      query(collection(db, 'dance-evaluations'), where('classId', '==', selectedClass)),
+    // Realtime Database에서 평가 기록 실시간 읽기
+    const evalsRef = ref(database, `dance-evaluations/${selectedClass}`)
+    const unsubEvals = onValue(
+      evalsRef,
       snapshot => {
         const firebaseRecords = {}
-        snapshot.forEach(doc => {
-          const data = doc.data()
-          const key = `${data.evalType}|${data.raterName}|${data.target}`
-          firebaseRecords[key] = data
-        })
+        if (snapshot.exists()) {
+          const data = snapshot.val()
+          Object.entries(data).forEach(([key, record]) => {
+            firebaseRecords[key] = record
+          })
+        }
 
         // localStorage와 합치기
         const localRecords = JSON.parse(localStorage.getItem(keyFor('records', selectedClass)) || '{}')
@@ -117,6 +119,10 @@ function DanceManagement() {
         setRecords(mergedRecords)
         localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(mergedRecords))
         detectFlags(mergedRecords)
+        setLoading(false)
+      },
+      error => {
+        console.error('평가 기록 로드 오류:', error)
         setLoading(false)
       }
     )
@@ -229,9 +235,9 @@ function DanceManagement() {
       delete newSubmitted[key]
       localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify(newSubmitted))
 
-      // Firestore에서도 제출 상태 삭제
-      const submittedDocRef = doc(db, 'dance-submitted', `${selectedClass}|${evalType}|${name}`)
-      await deleteDoc(submittedDocRef)
+      // RTDB에서도 제출 상태 삭제
+      const submittedRef = ref(database, `dance-submitted/${selectedClass}/${evalType}/${name}`)
+      await remove(submittedRef)
 
       // 해당 학생의 평가 기록 삭제
       const newRecords = {...records}
@@ -240,10 +246,10 @@ function DanceManagement() {
         return record.evalType === evalType && record.raterName === name
       })
 
-      // Firestore에서 평가 기록 삭제
+      // RTDB에서 평가 기록 삭제
       const deletePromises = keysToDelete.map(k => {
-        const docId = `${selectedClass}|${k}`
-        return deleteDoc(doc(db, 'dance-evaluations', docId))
+        const evalRef = ref(database, `dance-evaluations/${selectedClass}/${k}`)
+        return remove(evalRef)
       })
 
       keysToDelete.forEach(k => delete newRecords[k])

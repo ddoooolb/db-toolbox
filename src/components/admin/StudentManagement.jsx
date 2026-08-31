@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
-import { db } from '../../firebase'
-import { collection, doc, setDoc, deleteDoc } from 'firebase/firestore'
+import { database } from '../../firebase'
+import { ref, set, remove } from 'firebase/database'
 import './StudentManagement.css'
 
 const SPORTS = [
@@ -49,8 +49,8 @@ function StudentManagement({ students, setStudents }) {
         // 수정
         console.log('수정 모드')
         const updated = { ...formData, id: editingId }
-        const docRef = doc(db, 'students', editingId)
-        await setDoc(docRef, updated)
+        const studentRef = ref(database, `students/${editingId}`)
+        await set(studentRef, updated)
         setStudents(students.map(s => s.id === editingId ? updated : s))
         setEditingId(null)
       } else {
@@ -74,13 +74,18 @@ function StudentManagement({ students, setStudents }) {
           newStudents.push(pairedStudent)
         }
 
-        console.log('Firestore에 저장할 학생:', newStudents)
+        console.log('RTDB에 저장할 학생:', newStudents)
 
-        // localStorage에만 저장 (Firestore 대신)
+        // Realtime Database에 저장
         for (const student of newStudents) {
           console.log('저장 중:', student.name)
-          // Firestore 저장 제거
-          console.log('저장 완료:', student.name)
+          try {
+            const studentRef = ref(database, `students/${student.id}`)
+            await set(studentRef, student)
+            console.log('저장 완료:', student.name)
+          } catch (error) {
+            console.error('RTDB 저장 오류:', student.name, error)
+          }
         }
 
         console.log('상태 업데이트')
@@ -104,9 +109,9 @@ function StudentManagement({ students, setStudents }) {
   const handleDeleteStudent = async (id) => {
     if (confirm('학생을 삭제하시겠습니까?')) {
       try {
-        // Firestore에서 삭제
-        const docRef = doc(db, 'students', id)
-        await deleteDoc(docRef)
+        // Realtime Database에서 삭제
+        const studentRef = ref(database, `students/${id}`)
+        await remove(studentRef)
         setStudents(students.filter(s => s.id !== id))
       } catch (error) {
         console.error('삭제 오류:', error)
@@ -164,10 +169,10 @@ function StudentManagement({ students, setStudents }) {
             }
           })
 
-          // Firestore에 저장
+          // Realtime Database에 저장
           Promise.all(newStudents.map(student => {
-            const docRef = doc(db, 'students', student.id)
-            return setDoc(docRef, student)
+            const studentRef = ref(database, `students/${student.id}`)
+            return set(studentRef, student)
           })).then(() => {
             setStudents([...students, ...newStudents])
             setCsvFile(null)
@@ -218,10 +223,10 @@ function StudentManagement({ students, setStudents }) {
             }
           })
 
-          // Firestore에 저장
+          // Realtime Database에 저장
           Promise.all(newStudents.map(student => {
-            const docRef = doc(db, 'students', student.id)
-            return setDoc(docRef, student)
+            const studentRef = ref(database, `students/${student.id}`)
+            return set(studentRef, student)
           })).then(() => {
             setStudents([...students, ...newStudents])
             setCsvFile(null)
