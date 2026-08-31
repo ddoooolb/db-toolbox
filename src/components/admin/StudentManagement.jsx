@@ -76,10 +76,11 @@ function StudentManagement({ students, setStudents }) {
 
         console.log('Firestore에 저장할 학생:', newStudents)
 
-        // localStorage에만 저장 (Firestore 권한 오류 우회)
+        // Firestore에 저장
         for (const student of newStudents) {
           console.log('저장 중:', student.name)
-          // Firestore 저장 제외 - 권한 오류 때문
+          const docRef = doc(db, 'students', student.id)
+          await setDoc(docRef, student)
           console.log('저장 완료:', student.name)
         }
 
