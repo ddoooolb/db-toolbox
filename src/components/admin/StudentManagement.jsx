@@ -185,12 +185,14 @@ function StudentManagement({ students, setStudents }) {
           localStorage.setItem('students-data', JSON.stringify(allSavedStudents))
           console.log('✓ CSV localStorage 저장:', allSavedStudents.length)
 
+          // 상태 업데이트 (localStorage 반영)
+          setStudents([...students, ...newStudents])
+
           // Firestore에 저장
           Promise.all(newStudents.map(student => {
             const docRef = doc(db, 'students', student.id)
             return setDoc(docRef, student)
           })).then(() => {
-            setStudents([...students, ...newStudents])
             setCsvFile(null)
             setCsvSport('')
             alert(`${newStudents.length}명의 학생이 추가되었습니다`)
@@ -236,12 +238,14 @@ function StudentManagement({ students, setStudents }) {
           localStorage.setItem('students-data', JSON.stringify(allSavedStudents))
           console.log('✓ CSV localStorage 저장:', allSavedStudents.length)
 
+          // 상태 업데이트 (localStorage 반영)
+          setStudents([...students, ...newStudents])
+
           // Firestore에 저장
           Promise.all(newStudents.map(student => {
             const docRef = doc(db, 'students', student.id)
             return setDoc(docRef, student)
           })).then(() => {
-            setStudents([...students, ...newStudents])
             setCsvFile(null)
             setCsvSport('')
             alert(`${newStudents.length}명의 학생이 추가되었습니다`)
