@@ -303,20 +303,6 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.134176182,
-          "name": "박지효",
-          "number": "12",
-          "class": "3-11",
-          "grade": 3
-        },
-        {
-          "id": 0.5790747838,
-          "name": "정아인",
-          "number": "26",
-          "class": "3-11",
-          "grade": 3
-        },
-        {
           "id": 0.0444822243,
           "name": "박시현",
           "number": "10",
@@ -341,6 +327,20 @@ export const initialGroupsData = {
           "id": 0.4665535517,
           "name": "전시현",
           "number": "24",
+          "class": "3-11",
+          "grade": 3
+        },
+        {
+          "id": 0.4883684128,
+          "name": "최민솔",
+          "number": "29",
+          "class": "3-11",
+          "grade": 3
+        },
+        {
+          "id": 0.0251537158,
+          "name": "김태은",
+          "number": "6",
           "class": "3-11",
           "grade": 3
         }
@@ -425,13 +425,6 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.4883684128,
-          "name": "최민솔",
-          "number": "29",
-          "class": "3-11",
-          "grade": 3
-        },
-        {
           "id": 0.7878799575,
           "name": "정유준",
           "number": "27",
@@ -446,16 +439,23 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.0251537158,
-          "name": "김태은",
-          "number": "6",
+          "id": 0.8639803985,
+          "name": "문서준",
+          "number": "9",
           "class": "3-11",
           "grade": 3
         },
         {
-          "id": 0.8639803985,
-          "name": "문서준",
-          "number": "9",
+          "id": 0.134176182,
+          "name": "박지효",
+          "number": "12",
+          "class": "3-11",
+          "grade": 3
+        },
+        {
+          "id": 0.5790747838,
+          "name": "정아인",
+          "number": "26",
           "class": "3-11",
           "grade": 3
         }
