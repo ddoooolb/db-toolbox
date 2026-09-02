@@ -109,6 +109,12 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
           >
             엑셀 내보내기
           </button>
+          <button
+            className={`nav-item ${activeMenu === 'danceBackup' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('danceBackup')}
+          >
+            💾 댄스평가 백업
+          </button>
         </nav>
 
         <main className="admin-content">
@@ -157,6 +163,60 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
 
               <button className="btn-primary" onClick={handleExportExcel}>
                 📊 엑셀로 내보내기
+              </button>
+            </div>
+          )}
+
+          {activeMenu === 'danceBackup' && (
+            <div className="menu-section">
+              <h2>💾 댄스평가 데이터 백업</h2>
+              <p style={{ marginBottom: '20px', color: '#666' }}>
+                현재 저장된 모든 댄스 평가 데이터를 JSON 파일로 다운로드합니다.
+              </p>
+              <button
+                className="btn-primary"
+                onClick={() => {
+                  const backupData = {}
+                  // 모든 반의 평가 데이터 수집
+                  for (let i = 1; i <= 3; i++) {
+                    for (let j = 1; j <= 12; j++) {
+                      const classId = `${i}학년 ${j}반`
+                      const records = JSON.parse(localStorage.getItem(`dance-eval-records:${classId}`) || '{}')
+                      const submitted = JSON.parse(localStorage.getItem(`dance-eval-submitted:${classId}`) || '{}')
+                      const teacherResult = JSON.parse(localStorage.getItem(`dance-eval-teacher-result:${classId}`) || '{}')
+
+                      if (Object.keys(records).length > 0 || Object.keys(submitted).length > 0) {
+                        backupData[classId] = {
+                          records,
+                          submitted,
+                          teacherResult,
+                          timestamp: new Date().toISOString()
+                        }
+                      }
+                    }
+                  }
+
+                  if (Object.keys(backupData).length === 0) {
+                    alert('백업할 데이터가 없습니다.')
+                    return
+                  }
+
+                  // 파일 다운로드
+                  const dataStr = JSON.stringify(backupData, null, 2)
+                  const dataBlob = new Blob([dataStr], { type: 'application/json' })
+                  const url = URL.createObjectURL(dataBlob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `댄스평가_백업_${new Date().toISOString().split('T')[0]}.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  alert('백업이 완료되었습니다.')
+                }}
+              >
+                📥 지금 백업 다운로드
               </button>
             </div>
           )}
