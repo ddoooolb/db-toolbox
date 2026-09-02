@@ -586,15 +586,22 @@ function DanceManagement() {
       {/* 제출 현황 */}
       <div className="dance-card">
         <div className="dance-step-label">제출 현황</div>
-        {submittedList.length === 0 ? (
-          <div style={{ color: 'var(--mute)', fontSize: '13px' }}>아직 제출한 학생이 없어요.</div>
-        ) : (
-          Object.keys(groups).sort().map(group => (
-            <div key={group}>
-              <div style={{ background: '#f5f5f5', fontWeight: '600', padding: '10px 12px', borderTop: '2px solid var(--navy)', fontSize: '13px' }}>
-                {group}
-              </div>
-              {groups[group].map(name => (
+        {Object.keys(groups).sort((a, b) => {
+          const numA = parseInt(a.match(/(\d+)조/)?.[1] || '0')
+          const numB = parseInt(b.match(/(\d+)조/)?.[1] || '0')
+          return numA - numB
+        }).map(group => (
+          <div key={group}>
+            <div style={{ background: '#f5f5f5', fontWeight: '600', padding: '10px 12px', borderTop: '2px solid var(--navy)', fontSize: '13px' }}>
+              {group}
+            </div>
+            {groups[group]
+              .sort((a, b) => {
+                const aNum = parseInt(a.match(/\d+/) ? a.match(/\d+/)[0] : '9999')
+                const bNum = parseInt(b.match(/\d+/) ? b.match(/\d+/)[0] : '9999')
+                return aNum - bNum
+              })
+              .map(name => (
                 ['round1', 'round2'].map(evalType => {
                   const key = `${evalType}|${name}`
                   const isSubmitted = submitted[key]
@@ -615,9 +622,8 @@ function DanceManagement() {
                   )
                 })
               ))}
-            </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
 
       {/* 신뢰도 점검 */}
