@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import DanceManagement from './DanceManagement'
 import { initialGroupsData } from '../../data/groupsData'
 import { db } from '../../firebase'
-import { doc, setDoc, collection, onSnapshot } from 'firebase/firestore'
+import { doc, setDoc, collection, onSnapshot, getDocs, query, where } from 'firebase/firestore'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -38,8 +38,36 @@ function DanceEvaluation() {
   const [openState, setOpenState] = useState({})
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem(keyFor('open', activeClass)) || '{}')
-    setOpenState(saved)
+    if (!activeClass) return
+
+    const loadOpenState = async () => {
+      // localStorage에서 먼저 로드
+      const localSaved = JSON.parse(localStorage.getItem(keyFor('open', activeClass)) || '{}')
+
+      // Firestore에서도 로드
+      try {
+        const snapshot = await getDocs(
+          query(collection(db, 'dance-open'), where('classId', '==', activeClass))
+        )
+        const firebaseOpen = {}
+        snapshot.forEach(doc => {
+          const data = doc.data()
+          firebaseOpen[data.evalType] = data.isOpen
+        })
+
+        // 합치기 (Firestore 우선)
+        const merged = { ...localSaved, ...firebaseOpen }
+        console.log('댄스 평가 상태 로드:', merged)
+        setOpenState(merged)
+        localStorage.setItem(keyFor('open', activeClass), JSON.stringify(merged))
+      } catch (error) {
+        console.error('평가 상태 로드 오류:', error)
+        // Firestore 실패 시 localStorage만 사용
+        setOpenState(localSaved)
+      }
+    }
+
+    loadOpenState()
   }, [activeClass])
 
   useEffect(() => {

@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from 'react'
 import StudentGroupManagement from '../admin/StudentGroupManagement'
 import { initialGroupsData } from '../../data/groupsData'
 import { db } from '../../firebase'
-import { collection, onSnapshot, doc, deleteDoc, query, where } from 'firebase/firestore'
+import { collection, onSnapshot, doc, deleteDoc, setDoc, query, where } from 'firebase/firestore'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -208,11 +208,28 @@ function DanceManagement() {
   }
 
   // 평가 열기/닫기
-  const toggleOpen = (type) => {
+  const toggleOpen = async (type) => {
     const newState = {...openState}
     newState[type] = !newState[type]
     setOpenState(newState)
+
+    // localStorage에 저장
     localStorage.setItem(keyFor('open', selectedClass), JSON.stringify(newState))
+    console.log('✓ localStorage 저장:', type, newState[type])
+
+    // Firestore에도 저장
+    try {
+      const docRef = doc(db, 'dance-open', `${selectedClass}|${type}`)
+      await setDoc(docRef, {
+        classId: selectedClass,
+        evalType: type,
+        isOpen: newState[type],
+        ts: Date.now()
+      })
+      console.log('✓ Firestore 저장:', type, newState[type])
+    } catch (error) {
+      console.error('✗ Firestore 저장 오류:', error)
+    }
   }
 
   // 제출 다시 허용
