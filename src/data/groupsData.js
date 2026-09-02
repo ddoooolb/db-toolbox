@@ -767,16 +767,9 @@ export const initialGroupsData = {
     "2조": {
       "members": [
         {
-          "id": 0.0601916801,
-          "name": "함의진",
-          "number": "28",
-          "class": "3-1",
-          "grade": 3
-        },
-        {
-          "id": 0.8737254833,
-          "name": "김민서",
-          "number": "6",
+          "id": 0.2426613781,
+          "name": "엄지율",
+          "number": "16",
           "class": "3-1",
           "grade": 3
         },
@@ -809,18 +802,6 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.2569121454,
-          "name": "정우진",
-          "number": "23",
-          "class": "3-1",
-          "grade": 3
-        }
-      ],
-      "leader": "함의진"
-    },
-    "3조": {
-      "members": [
-        {
           "id": 0.2446761046,
           "name": "오준석",
           "number": "17",
@@ -828,9 +809,21 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.2426613781,
-          "name": "엄지율",
-          "number": "16",
+          "id": 0.2569121454,
+          "name": "정우진",
+          "number": "23",
+          "class": "3-1",
+          "grade": 3
+        }
+      ],
+      "leader": "엄지율"
+    },
+    "3조": {
+      "members": [
+        {
+          "id": 0.8737254833,
+          "name": "김민서",
+          "number": "6",
           "class": "3-1",
           "grade": 3
         },
@@ -875,9 +868,16 @@ export const initialGroupsData = {
           "number": "14",
           "class": "3-1",
           "grade": 3
+        },
+        {
+          "id": 0.0601916801,
+          "name": "함의진",
+          "number": "28",
+          "class": "3-1",
+          "grade": 3
         }
       ],
-      "leader": "오준석"
+      "leader": "김민서"
     },
     "4조": {
       "members": [
