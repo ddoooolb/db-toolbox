@@ -136,6 +136,7 @@ function DanceManagement() {
         const localSubmitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
         const mergedSubmitted = { ...localSubmitted, ...firebaseSubmitted }
 
+        console.log(`[${selectedClass}] 제출 데이터:`, { firebaseSubmitted, localSubmitted, mergedSubmitted })
         setSubmitted(mergedSubmitted)
         localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify(mergedSubmitted))
       },
@@ -143,6 +144,7 @@ function DanceManagement() {
         console.error('dance-submitted 로드 실패:', error.code)
         // Firestore 실패 시 localStorage만 사용
         const localSubmitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
+        console.log(`[${selectedClass}] 제출 데이터 (Firestore 오류)`, localSubmitted)
         setSubmitted(localSubmitted)
       }
     )

@@ -189,6 +189,7 @@ function DanceEvaluation() {
       const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', activeClass)) || '{}')
       submitted[`${evalType}|${myName}`] = true
       localStorage.setItem(keyFor('submitted', activeClass), JSON.stringify(submitted))
+      console.log(`✓ ${myName} ${evalType} 제출 저장:`, submitted)
 
       // Firestore에 제출 상태도 저장
       const submittedDocRef = doc(db, 'dance-submitted', `${activeClass}|${evalType}|${myName}`)
