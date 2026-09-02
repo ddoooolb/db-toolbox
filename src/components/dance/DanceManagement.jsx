@@ -121,16 +121,40 @@ function DanceManagement() {
       }
     )
 
+    // Firestore에서 제출 상태 실시간 읽기
+    const unsubSubmitted = onSnapshot(
+      query(collection(db, 'dance-submitted'), where('classId', '==', selectedClass)),
+      snapshot => {
+        const firebaseSubmitted = {}
+        snapshot.forEach(doc => {
+          const data = doc.data()
+          const key = `${data.evalType}|${data.studentName}`
+          firebaseSubmitted[key] = true
+        })
+
+        // localStorage와 합치기
+        const localSubmitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
+        const mergedSubmitted = { ...localSubmitted, ...firebaseSubmitted }
+
+        setSubmitted(mergedSubmitted)
+        localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify(mergedSubmitted))
+      },
+      error => {
+        console.error('dance-submitted 로드 실패:', error.code)
+        // Firestore 실패 시 localStorage만 사용
+        const localSubmitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
+        setSubmitted(localSubmitted)
+      }
+    )
+
     // localStorage에서 다른 데이터 로드
     try {
       const openState = JSON.parse(localStorage.getItem(keyFor('open', selectedClass)) || '{}')
-      const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
       const teacherResults = JSON.parse(localStorage.getItem(keyFor('teacher-result', selectedClass)) || '{}')
       const overrides = JSON.parse(localStorage.getItem(keyFor('overrides', selectedClass)) || '{}')
       const resultOverrides = JSON.parse(localStorage.getItem(keyFor('result-overrides', selectedClass)) || '{}')
 
       setOpenState(openState)
-      setSubmitted(submitted)
       setTeacherResults(teacherResults)
       setOverrides(overrides)
       setResultOverrides(resultOverrides)
@@ -138,7 +162,10 @@ function DanceManagement() {
       console.error('데이터 로드 실패:', e)
     }
 
-    return () => unsubEvals()
+    return () => {
+      unsubEvals()
+      unsubSubmitted()
+    }
   }, [selectedClass])
 
   const loadData = () => {
