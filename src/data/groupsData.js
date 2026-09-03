@@ -2133,6 +2133,60 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
+          "id": 0.7385236286,
+          "name": "이연우",
+          "number": "22",
+          "class": "3-7",
+          "grade": 3
+        },
+        {
+          "id": 0.3353049521,
+          "name": "장민기",
+          "number": "25",
+          "class": "3-7",
+          "grade": 3
+        },
+        {
+          "id": 0.0484100497,
+          "name": "박서정",
+          "number": "14",
+          "class": "3-7",
+          "grade": 3
+        },
+        {
+          "id": 0.7751194912,
+          "name": "고건호",
+          "number": "4",
+          "class": "3-7",
+          "grade": 3
+        }
+      ],
+      "leader": "김도희"
+    },
+    "2조": {
+      "members": [
+        {
+          "id": 0.7156290376,
+          "name": "김지연",
+          "number": "11",
+          "class": "3-7",
+          "grade": 3
+        },
+        {
+          "id": 0.893651094,
+          "name": "조예정",
+          "number": "27",
+          "class": "3-7",
+          "grade": 3
+        },
+        {
+          "id": 0.1868247098,
+          "name": "김지아",
+          "number": "10",
+          "class": "3-7",
+          "grade": 3
+        },
+        {
           "id": 0.2767111339,
           "name": "양서빈",
           "number": "19",
@@ -2168,67 +2222,6 @@ export const initialGroupsData = {
           "grade": 3
         }
       ],
-      "leader": "김도희"
-    },
-    "2조": {
-      "members": [
-        {
-          "id": 0.7156290376,
-          "name": "김지연",
-          "number": "11",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.893651094,
-          "name": "조예정",
-          "number": "27",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.1868247098,
-          "name": "김지아",
-          "number": "10",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.7385236286,
-          "name": "이연우",
-          "number": "22",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.3353049521,
-          "name": "장민기",
-          "number": "25",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.0484100497,
-          "name": "박서정",
-          "number": "14",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.7751194912,
-          "name": "고건호",
-          "number": "4",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.6192217511,
-          "name": "김래현",
-          "number": "8",
-          "class": "3-7",
-          "grade": 3
-        }
-      ],
       "leader": "김지연"
     },
     "3조": {
@@ -2251,13 +2244,6 @@ export const initialGroupsData = {
           "id": 0.5880109279,
           "name": "최예성",
           "number": "29",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.9812588207,
-          "name": "이도윤",
-          "number": "21",
           "class": "3-7",
           "grade": 3
         },
