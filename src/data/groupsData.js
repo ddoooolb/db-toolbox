@@ -2119,20 +2119,6 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.8090454528,
-          "name": "강아인",
-          "number": "2",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.9093961047,
-          "name": "전강현",
-          "number": "26",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
           "id": 0.2767111339,
           "name": "양서빈",
           "number": "19",
@@ -2227,6 +2213,20 @@ export const initialGroupsData = {
           "number": "8",
           "class": "3-7",
           "grade": 3
+        },
+        {
+          "id": 0.8090454528,
+          "name": "강아인",
+          "number": "2",
+          "class": "3-7",
+          "grade": 3
+        },
+        {
+          "id": 0.9093961047,
+          "name": "전강현",
+          "number": "26",
+          "class": "3-7",
+          "grade": 3
         }
       ],
       "leader": "김지연"
@@ -2244,13 +2244,6 @@ export const initialGroupsData = {
           "id": 0.0868165274,
           "name": "박서하",
           "number": "15",
-          "class": "3-7",
-          "grade": 3
-        },
-        {
-          "id": 0.5880109279,
-          "name": "최예성",
-          "number": "29",
           "class": "3-7",
           "grade": 3
         },
@@ -2288,6 +2281,13 @@ export const initialGroupsData = {
           "number": "23",
           "class": "3-7",
           "grade": 3
+        },
+        {
+          "id": 0.5738038358,
+          "name": "구예성",
+          "number": "5",
+          "class": "3-7",
+          "grade": 3
         }
       ],
       "leader": "서지우"
@@ -2309,9 +2309,9 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.5738038358,
-          "name": "구예성",
-          "number": "5",
+          "id": 0.5880109279,
+          "name": "최예성",
+          "number": "29",
           "class": "3-7",
           "grade": 3
         },
