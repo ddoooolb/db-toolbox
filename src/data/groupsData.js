@@ -2159,6 +2159,13 @@ export const initialGroupsData = {
           "number": "4",
           "class": "3-7",
           "grade": 3
+        },
+        {
+          "id": 0.6192217511,
+          "name": "김래현",
+          "number": "8",
+          "class": "3-7",
+          "grade": 3
         }
       ],
       "leader": "김도희"
