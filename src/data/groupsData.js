@@ -774,6 +774,60 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
+          "id": 0.8439815755,
+          "name": "김윤서",
+          "number": "8",
+          "class": "3-1",
+          "grade": 3
+        },
+        {
+          "id": 0.4113920415,
+          "name": "윤서현",
+          "number": "20",
+          "class": "3-1",
+          "grade": 3
+        },
+        {
+          "id": 0.5989710573,
+          "name": "김도율",
+          "number": "4",
+          "class": "3-1",
+          "grade": 3
+        },
+        {
+          "id": 0.789103247,
+          "name": "박제현",
+          "number": "13",
+          "class": "3-1",
+          "grade": 3
+        },
+        {
+          "id": 0.2446761046,
+          "name": "오준석",
+          "number": "17",
+          "class": "3-1",
+          "grade": 3
+        },
+        {
+          "id": 0.2569121454,
+          "name": "정우진",
+          "number": "23",
+          "class": "3-1",
+          "grade": 3
+        }
+      ],
+      "leader": "엄지율"
+    },
+    "3조": {
+      "members": [
+        {
+          "id": 0.8737254833,
+          "name": "김민서",
+          "number": "6",
+          "class": "3-1",
+          "grade": 3
+        },
+        {
           "id": 0.6755891049,
           "name": "석다윤",
           "number": "15",
@@ -816,63 +870,9 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.2446761046,
-          "name": "오준석",
-          "number": "17",
-          "class": "3-1",
-          "grade": 3
-        }
-      ],
-      "leader": "엄지율"
-    },
-    "3조": {
-      "members": [
-        {
-          "id": 0.8737254833,
-          "name": "김민서",
-          "number": "6",
-          "class": "3-1",
-          "grade": 3
-        },
-        {
-          "id": 0.8439815755,
-          "name": "김윤서",
-          "number": "8",
-          "class": "3-1",
-          "grade": 3
-        },
-        {
-          "id": 0.4113920415,
-          "name": "윤서현",
-          "number": "20",
-          "class": "3-1",
-          "grade": 3
-        },
-        {
-          "id": 0.5989710573,
-          "name": "김도율",
-          "number": "4",
-          "class": "3-1",
-          "grade": 3
-        },
-        {
-          "id": 0.789103247,
-          "name": "박제현",
-          "number": "13",
-          "class": "3-1",
-          "grade": 3
-        },
-        {
           "id": 0.0601916801,
           "name": "함의진",
           "number": "28",
-          "class": "3-1",
-          "grade": 3
-        },
-        {
-          "id": 0.2569121454,
-          "name": "정우진",
-          "number": "23",
           "class": "3-1",
           "grade": 3
         }
