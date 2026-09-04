@@ -521,6 +521,27 @@ export const initialGroupsData = {
           "number": "13",
           "class": "3-12",
           "grade": 3
+        },
+        {
+          "id": 0.4257087136,
+          "name": "이채웅",
+          "number": "20",
+          "class": "3-12",
+          "grade": 3
+        },
+        {
+          "id": 0.16316632,
+          "name": "황성일",
+          "number": "31",
+          "class": "3-12",
+          "grade": 3
+        },
+        {
+          "id": 0.3260545801,
+          "name": "김현우",
+          "number": "7",
+          "class": "3-12",
+          "grade": 3
         }
       ],
       "leader": "이채민"
@@ -582,25 +603,6 @@ export const initialGroupsData = {
           "number": "10",
           "class": "3-12",
           "grade": 3
-        }
-      ],
-      "leader": "김지민"
-    },
-    "3조": {
-      "members": [
-        {
-          "id": 0.3403954804,
-          "name": "정예율",
-          "number": "24",
-          "class": "3-12",
-          "grade": 3
-        },
-        {
-          "id": 0.0903361568,
-          "name": "고예준",
-          "number": "1",
-          "class": "3-12",
-          "grade": 3
         },
         {
           "id": 0.3127212173,
@@ -610,37 +612,16 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.5439242585,
-          "name": "최민호",
-          "number": "27",
-          "class": "3-12",
-          "grade": 3
-        },
-        {
-          "id": 0.3260545801,
-          "name": "김현우",
-          "number": "7",
-          "class": "3-12",
-          "grade": 3
-        },
-        {
-          "id": 0.4257087136,
-          "name": "이채웅",
-          "number": "20",
-          "class": "3-12",
-          "grade": 3
-        },
-        {
-          "id": 0.16316632,
-          "name": "황성일",
-          "number": "31",
+          "id": 0.0903361568,
+          "name": "고예준",
+          "number": "1",
           "class": "3-12",
           "grade": 3
         }
       ],
-      "leader": "정예율"
+      "leader": "김지민"
     },
-    "4조": {
+    "3조": {
       "members": [
         {
           "id": 0.8580814701,
@@ -695,6 +676,20 @@ export const initialGroupsData = {
           "id": 0.5673235132,
           "name": "전경훈",
           "number": "23",
+          "class": "3-12",
+          "grade": 3
+        },
+        {
+          "id": 0.3403954804,
+          "name": "정예율",
+          "number": "24",
+          "class": "3-12",
+          "grade": 3
+        },
+        {
+          "id": 0.5439242585,
+          "name": "최민호",
+          "number": "27",
           "class": "3-12",
           "grade": 3
         }
