@@ -1,5 +1,9 @@
 import { useState } from 'react'
+import CryptoJS from 'crypto-js'
 import './AdminLogin.css'
+
+// 해시된 비밀번호 (37083708의 SHA256)
+const HASHED_PASSWORD = CryptoJS.SHA256('37083708').toString()
 
 function AdminLogin({ onLoginSuccess }) {
   const [password, setPassword] = useState('')
@@ -7,9 +11,9 @@ function AdminLogin({ onLoginSuccess }) {
 
   const handleLogin = (e) => {
     e.preventDefault()
-    const correctPassword = '37083708'
+    const hashedInput = CryptoJS.SHA256(password).toString()
 
-    if (password === correctPassword) {
+    if (hashedInput === HASHED_PASSWORD) {
       setError('')
       onLoginSuccess()
     } else {
