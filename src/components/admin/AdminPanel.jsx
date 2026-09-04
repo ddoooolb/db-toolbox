@@ -2,6 +2,7 @@ import { useState } from 'react'
 import * as XLSX from 'xlsx'
 import StudentManagement from './StudentManagement'
 import AttendanceStatistics from '../attendance/AttendanceStatistics'
+import { getEncryptedItem } from '../../utils/encryption'
 import './AdminPanel.css'
 
 function AdminPanel({ students, setStudents, attendance, onLogout }) {
@@ -181,9 +182,9 @@ function AdminPanel({ students, setStudents, attendance, onLogout }) {
                   for (let i = 1; i <= 3; i++) {
                     for (let j = 1; j <= 12; j++) {
                       const classId = `${i}학년 ${j}반`
-                      const records = JSON.parse(localStorage.getItem(`dance-eval-records:${classId}`) || '{}')
-                      const submitted = JSON.parse(localStorage.getItem(`dance-eval-submitted:${classId}`) || '{}')
-                      const teacherResult = JSON.parse(localStorage.getItem(`dance-eval-teacher-result:${classId}`) || '{}')
+                      const records = getEncryptedItem(`dance-eval-records:${classId}`) || {}
+                      const submitted = getEncryptedItem(`dance-eval-submitted:${classId}`) || {}
+                      const teacherResult = getEncryptedItem(`dance-eval-teacher-result:${classId}`) || {}
 
                       if (Object.keys(records).length > 0 || Object.keys(submitted).length > 0) {
                         backupData[classId] = {

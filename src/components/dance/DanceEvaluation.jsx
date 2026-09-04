@@ -3,6 +3,7 @@ import DanceManagement from './DanceManagement'
 import { initialGroupsData } from '../../data/groupsData'
 import { db } from '../../firebase'
 import { doc, setDoc, collection, onSnapshot, getDocs, query, where } from 'firebase/firestore'
+import { getEncryptedItem, setEncryptedItem } from '../../utils/encryption'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -138,7 +139,7 @@ function DanceEvaluation() {
 
   const handleNameSelect = (name) => {
     setMyName(name)
-    const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', activeClass)) || '{}')
+    const submitted = getEncryptedItem(keyFor('submitted', activeClass)) || {}
     const key = `${evalType}|${name}`
 
     if (submitted[key]) {
@@ -162,7 +163,7 @@ function DanceEvaluation() {
 
     setIsSubmitting(true)
     try {
-      const records = JSON.parse(localStorage.getItem(keyFor('records', activeClass)) || '{}')
+      const records = getEncryptedItem(keyFor('records', activeClass)) || {}
       const firebaseUpdates = []
 
       targets.forEach(target => {
@@ -184,11 +185,11 @@ function DanceEvaluation() {
         firebaseUpdates.push(setDoc(docRef, record))
       })
 
-      localStorage.setItem(keyFor('records', activeClass), JSON.stringify(records))
+      setEncryptedItem(keyFor('records', activeClass), records)
 
-      const submitted = JSON.parse(localStorage.getItem(keyFor('submitted', activeClass)) || '{}')
+      const submitted = getEncryptedItem(keyFor('submitted', activeClass)) || {}
       submitted[`${evalType}|${myName}`] = true
-      localStorage.setItem(keyFor('submitted', activeClass), JSON.stringify(submitted))
+      setEncryptedItem(keyFor('submitted', activeClass), submitted)
       console.log(`✓ ${myName} ${evalType} 제출 저장:`, submitted)
 
       // Firestore에 제출 상태도 저장

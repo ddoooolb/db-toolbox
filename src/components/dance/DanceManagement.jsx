@@ -3,6 +3,7 @@ import StudentGroupManagement from '../admin/StudentGroupManagement'
 import { initialGroupsData } from '../../data/groupsData'
 import { db } from '../../firebase'
 import { collection, onSnapshot, doc, deleteDoc, setDoc, query, where } from 'firebase/firestore'
+import { getEncryptedItem, setEncryptedItem } from '../../utils/encryption'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -111,11 +112,11 @@ function DanceManagement() {
         })
 
         // localStorage와 합치기
-        const localRecords = JSON.parse(localStorage.getItem(keyFor('records', selectedClass)) || '{}')
+        const localRecords = getEncryptedItem(keyFor('records', selectedClass)) || {}
         const mergedRecords = { ...localRecords, ...firebaseRecords }
 
         setRecords(mergedRecords)
-        localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(mergedRecords))
+        setEncryptedItem(keyFor('records', selectedClass), mergedRecords)
         detectFlags(mergedRecords)
         setLoading(false)
       }
@@ -133,17 +134,17 @@ function DanceManagement() {
         })
 
         // localStorage와 합치기
-        const localSubmitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
+        const localSubmitted = getEncryptedItem(keyFor('submitted', selectedClass)) || {}
         const mergedSubmitted = { ...localSubmitted, ...firebaseSubmitted }
 
         console.log(`[${selectedClass}] 제출 데이터:`, { firebaseSubmitted, localSubmitted, mergedSubmitted })
         setSubmitted(mergedSubmitted)
-        localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify(mergedSubmitted))
+        setEncryptedItem(keyFor('submitted', selectedClass), mergedSubmitted)
       },
       error => {
         console.error('dance-submitted 로드 실패:', error.code)
         // Firestore 실패 시 localStorage만 사용
-        const localSubmitted = JSON.parse(localStorage.getItem(keyFor('submitted', selectedClass)) || '{}')
+        const localSubmitted = getEncryptedItem(keyFor('submitted', selectedClass)) || {}
         console.log(`[${selectedClass}] 제출 데이터 (Firestore 오류)`, localSubmitted)
         setSubmitted(localSubmitted)
       }
@@ -152,9 +153,9 @@ function DanceManagement() {
     // localStorage에서 다른 데이터 로드
     try {
       const openState = JSON.parse(localStorage.getItem(keyFor('open', selectedClass)) || '{}')
-      const teacherResults = JSON.parse(localStorage.getItem(keyFor('teacher-result', selectedClass)) || '{}')
-      const overrides = JSON.parse(localStorage.getItem(keyFor('overrides', selectedClass)) || '{}')
-      const resultOverrides = JSON.parse(localStorage.getItem(keyFor('result-overrides', selectedClass)) || '{}')
+      const teacherResults = getEncryptedItem(keyFor('teacher-result', selectedClass)) || {}
+      const overrides = getEncryptedItem(keyFor('overrides', selectedClass)) || {}
+      const resultOverrides = getEncryptedItem(keyFor('result-overrides', selectedClass)) || {}
 
       setOpenState(openState)
       setTeacherResults(teacherResults)
@@ -273,7 +274,7 @@ function DanceManagement() {
       // submitted 삭제
       const newSubmitted = {...submitted}
       delete newSubmitted[key]
-      localStorage.setItem(keyFor('submitted', selectedClass), JSON.stringify(newSubmitted))
+      setEncryptedItem(keyFor('submitted', selectedClass), newSubmitted)
 
       // Firestore에서도 제출 상태 삭제
       const submittedDocRef = doc(db, 'dance-submitted', `${selectedClass}|${evalType}|${name}`)
@@ -293,7 +294,7 @@ function DanceManagement() {
       })
 
       keysToDelete.forEach(k => delete newRecords[k])
-      localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(newRecords))
+      setEncryptedItem(keyFor('records', selectedClass), newRecords)
 
       await Promise.all(deletePromises)
 
@@ -318,7 +319,7 @@ function DanceManagement() {
       }
     })
     setRecords(newRecords)
-    localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(newRecords))
+    setEncryptedItem(keyFor('records', selectedClass), newRecords)
     loadData()
   }
 
@@ -331,7 +332,7 @@ function DanceManagement() {
       newResults[group] = score
     }
     setTeacherResults(newResults)
-    localStorage.setItem(keyFor('teacher-result', selectedClass), JSON.stringify(newResults))
+    setEncryptedItem(keyFor('teacher-result', selectedClass), newResults)
   }
 
   // 오버라이드 입력
@@ -343,7 +344,7 @@ function DanceManagement() {
       newOverrides[name] = Number(value)
     }
     setOverrides(newOverrides)
-    localStorage.setItem(keyFor('overrides', selectedClass), JSON.stringify(newOverrides))
+    setEncryptedItem(keyFor('overrides', selectedClass), newOverrides)
   }
 
   // 테스트 데이터 생성
