@@ -1,11 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import * as XLSX from 'xlsx'
 import StudentManagement from './StudentManagement'
 import AttendanceStatistics from '../attendance/AttendanceStatistics'
 import { getEncryptedItem } from '../../utils/encryption'
+import { db } from '../../firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { initialStudents } from '../../data/students'
 import './AdminPanel.css'
 
-function AdminPanel({ students, setStudents, attendance, onLogout }) {
+function AdminPanel({ students: propsStudents, setStudents: propsSetStudents, attendance, onLogout }) {
+  const [students, setStudents] = useState(propsStudents)
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'students'),
+      snapshot => {
+        const firestoreStudents = []
+        snapshot.forEach(doc => {
+          firestoreStudents.push(doc.data())
+        })
+
+        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+        const allStudents = [...initialStudents, ...localStudents, ...firestoreStudents]
+        const uniqueStudents = Array.from(
+          new Map(allStudents.map(s => [s.id, s])).values()
+        )
+
+        setStudents(uniqueStudents)
+        propsSetStudents?.(uniqueStudents)
+      },
+      error => {
+        console.error('Firestore 오류:', error)
+      }
+    )
+
+    return () => unsubscribe()
+  }, [])
   const [activeMenu, setActiveMenu] = useState('students')
   const [selectedSport, setSelectedSport] = useState('')
   const [startDate, setStartDate] = useState(() => {
