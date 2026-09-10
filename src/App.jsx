@@ -18,9 +18,20 @@ function App() {
 
     initializeAuth()
 
-    // 초기 localStorage 상태 확인
+    // localStorage에서 테스트 데이터 정리
     const savedData = localStorage.getItem('students-data')
-    console.log('📦 localStorage 초기 상태:', savedData ? JSON.parse(savedData).length + '명' : '비어있음')
+    if (savedData) {
+      const students = JSON.parse(savedData)
+      const filtered = students.filter(s => !s.name.includes('테스트'))
+      if (filtered.length !== students.length) {
+        console.log(`🗑️ 테스트 데이터 ${students.length - filtered.length}개 제거`)
+        localStorage.setItem('students-data', JSON.stringify(filtered))
+      }
+    }
+
+    // 초기 localStorage 상태 확인
+    const cleanedData = localStorage.getItem('students-data')
+    console.log('📦 localStorage 초기 상태:', cleanedData ? JSON.parse(cleanedData).length + '명' : '비어있음')
 
     // Firestore에서 groupsData 실시간 동기화
     const unsubscribeGroups = onSnapshot(
