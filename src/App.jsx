@@ -18,14 +18,22 @@ function App() {
 
     initializeAuth()
 
-    // localStorage에서 테스트 데이터 정리
+    // localStorage 정리: 배구 데이터와 테스트 데이터 제거
     const savedData = localStorage.getItem('students-data')
     if (savedData) {
-      const students = JSON.parse(savedData)
-      const filtered = students.filter(s => !s.name.includes('테스트'))
-      if (filtered.length !== students.length) {
-        console.log(`🗑️ 테스트 데이터 ${students.length - filtered.length}개 제거`)
-        localStorage.setItem('students-data', JSON.stringify(filtered))
+      try {
+        const students = JSON.parse(savedData)
+        const filtered = students.filter(s => {
+          // 배구 데이터, 테스트 데이터 제거
+          return !s.sports?.includes('배구') && !s.name?.includes('테스트')
+        })
+        if (filtered.length !== students.length) {
+          console.log(`🗑️ 불필요한 데이터 ${students.length - filtered.length}개 제거`)
+          localStorage.setItem('students-data', JSON.stringify(filtered))
+        }
+      } catch (e) {
+        console.log('localStorage 초기화')
+        localStorage.removeItem('students-data')
       }
     }
 
