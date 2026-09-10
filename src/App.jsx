@@ -95,7 +95,7 @@ function App() {
 
   // 출석 전용 모드
   if (attendanceMode) {
-    return <AttendancePublic students={initialStudents} />
+    return <AttendancePublic students={students} />
   }
 
   // 댄스 평가 모드

@@ -1,20 +1,54 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AttendanceMain from './AttendanceMain'
 import AdminLogin from '../admin/AdminLogin'
 import AdminPanel from '../admin/AdminPanel'
 import { initialStudents } from '../../data/students'
+import { db } from '../../firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
 import './AttendancePublic.css'
 
-function AttendancePublic({ students }) {
+function AttendancePublic({ students: propsStudents }) {
   const [attendance, setAttendance] = useState({})
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
+  const [students, setStudents] = useState(initialStudents)
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'students'),
+      snapshot => {
+        const firestoreStudents = []
+        snapshot.forEach(doc => {
+          firestoreStudents.push(doc.data())
+        })
+
+        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+        const allStudents = [...initialStudents, ...localStudents, ...firestoreStudents]
+        const uniqueStudents = Array.from(
+          new Map(allStudents.map(s => [s.id, s])).values()
+        )
+
+        setStudents(uniqueStudents)
+      },
+      error => {
+        console.error('Firestore 오류:', error)
+        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
+        const allStudents = [...initialStudents, ...localStudents]
+        const uniqueStudents = Array.from(
+          new Map(allStudents.map(s => [s.id, s])).values()
+        )
+        setStudents(uniqueStudents)
+      }
+    )
+
+    return () => unsubscribe()
+  }, [])
 
   if (isAdminLoggedIn) {
     return (
       <AdminPanel
-        students={initialStudents}
-        setStudents={() => {}}
+        students={students}
+        setStudents={setStudents}
         attendance={attendance}
         onLogout={() => {
           setIsAdminLoggedIn(false)
@@ -42,7 +76,7 @@ function AttendancePublic({ students }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
           <div>
             <h1>학교스포츠클럽 출석</h1>
-            <p className="subtitle">태블릿 전용 출석 페이지</p>
+            <p className="subtitle">태블릿 전용 출석 페이지 ({students.length}명)</p>
           </div>
           <button
             onClick={() => setShowAdminLogin(true)}
