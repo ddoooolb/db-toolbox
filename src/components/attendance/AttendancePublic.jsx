@@ -22,8 +22,7 @@ function AttendancePublic({ students: propsStudents }) {
           firestoreStudents.push(doc.data())
         })
 
-        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-        const allStudents = [...initialStudents, ...localStudents, ...firestoreStudents]
+        const allStudents = [...initialStudents, ...firestoreStudents]
         const uniqueStudents = Array.from(
           new Map(allStudents.map(s => [s.id, s])).values()
         )
@@ -32,12 +31,7 @@ function AttendancePublic({ students: propsStudents }) {
       },
       error => {
         console.error('Firestore 오류:', error)
-        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-        const allStudents = [...initialStudents, ...localStudents]
-        const uniqueStudents = Array.from(
-          new Map(allStudents.map(s => [s.id, s])).values()
-        )
-        setStudents(uniqueStudents)
+        setStudents(initialStudents)
       }
     )
 

@@ -18,29 +18,6 @@ function App() {
 
     initializeAuth()
 
-    // localStorage 정리: 배구 데이터와 테스트 데이터 제거
-    const savedData = localStorage.getItem('students-data')
-    if (savedData) {
-      try {
-        const students = JSON.parse(savedData)
-        const filtered = students.filter(s => {
-          // 배구 데이터, 테스트 데이터 제거
-          return !s.sports?.includes('배구') && !s.name?.includes('테스트')
-        })
-        if (filtered.length !== students.length) {
-          console.log(`🗑️ 불필요한 데이터 ${students.length - filtered.length}개 제거`)
-          localStorage.setItem('students-data', JSON.stringify(filtered))
-        }
-      } catch (e) {
-        console.log('localStorage 초기화')
-        localStorage.removeItem('students-data')
-      }
-    }
-
-    // 초기 localStorage 상태 확인
-    const cleanedData = localStorage.getItem('students-data')
-    console.log('📦 localStorage 초기 상태:', cleanedData ? JSON.parse(cleanedData).length + '명' : '비어있음')
-
     // Firestore에서 groupsData 실시간 동기화
     const unsubscribeGroups = onSnapshot(
       collection(db, 'groups'),
@@ -74,29 +51,19 @@ function App() {
 
         console.log('✓ Firestore students 로드:', firestoreStudents.length)
 
-        // localStorage의 기존 데이터도 함께 로드
-        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-
-        // 기본 데이터 + localStorage + Firestore를 모두 합침
-        const allStudents = [...initialStudents, ...localStudents, ...firestoreStudents]
+        // 기본 데이터 + Firestore를 합침
+        const allStudents = [...initialStudents, ...firestoreStudents]
         const uniqueStudents = Array.from(
           new Map(allStudents.map(s => [s.id, s])).values()
         )
 
         console.log('✓ 최종 학생 수:', uniqueStudents.length)
         setStudents(uniqueStudents)
-        localStorage.setItem('students-data', JSON.stringify(uniqueStudents))
       },
       error => {
         console.error('✗ Firestore students 오류:', error.code, error.message)
-        // Firestore 실패 시에도 localStorage 데이터로 화면 표시
-        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-        const allStudents = [...initialStudents, ...localStudents]
-        const uniqueStudents = Array.from(
-          new Map(allStudents.map(s => [s.id, s])).values()
-        )
-        console.log('📌 Firestore 실패, localStorage로 복구:', uniqueStudents.length)
-        setStudents(uniqueStudents)
+        // Firestore 실패 시 initialStudents만 사용
+        setStudents(initialStudents)
       }
     )
 

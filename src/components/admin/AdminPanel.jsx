@@ -20,8 +20,7 @@ function AdminPanel({ students: propsStudents, setStudents: propsSetStudents, at
           firestoreStudents.push(doc.data())
         })
 
-        const localStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-        const allStudents = [...initialStudents, ...localStudents, ...firestoreStudents]
+        const allStudents = [...initialStudents, ...firestoreStudents]
         const uniqueStudents = Array.from(
           new Map(allStudents.map(s => [s.id, s])).values()
         )

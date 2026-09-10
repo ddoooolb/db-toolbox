@@ -51,18 +51,7 @@ function StudentManagement({ students, setStudents }) {
         console.log('수정 모드')
         const updated = { ...formData, id: editingId }
 
-        // localStorage에 저장
-        const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-        const idx = savedStudents.findIndex(s => s.id === editingId)
-        if (idx >= 0) {
-          savedStudents[idx] = updated
-        } else {
-          savedStudents.push(updated)
-        }
-        localStorage.setItem('students-data', JSON.stringify(savedStudents))
-        console.log('✓ localStorage 수정 저장')
-
-        // Firestore에 저장
+        // Firestore에만 저장
         const docRef = doc(db, 'students', editingId)
         await setDoc(docRef, updated)
         console.log('✓ Firestore 수정 저장')
@@ -72,36 +61,24 @@ function StudentManagement({ students, setStudents }) {
       } else {
         // 추가
         console.log('추가 모드')
-        const newStudents = []
-
         const newStudent = {
           ...formData,
           id: Date.now().toString()
         }
-        newStudents.push(newStudent)
 
-        console.log('Firestore에 저장할 학생:', newStudents)
+        console.log('Firestore에 저장할 학생:', newStudent)
 
-        // localStorage에 저장
-        const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-        const allSavedStudents = [...savedStudents, ...newStudents]
-        localStorage.setItem('students-data', JSON.stringify(allSavedStudents))
-        console.log('✓ localStorage 저장:', allSavedStudents.length)
-
-        // Firestore에 저장
-        for (const student of newStudents) {
-          console.log('저장 중:', student.name, student.id)
-          try {
-            const docRef = doc(db, 'students', student.id)
-            await setDoc(docRef, student)
-            console.log('✓ Firestore 저장 완료:', student.name)
-          } catch (error) {
-            console.error('✗ Firestore 저장 오류:', student.name, error.code, error.message)
-          }
+        // Firestore에만 저장
+        try {
+          const docRef = doc(db, 'students', newStudent.id)
+          await setDoc(docRef, newStudent)
+          console.log('✓ Firestore 저장 완료:', newStudent.name)
+        } catch (error) {
+          console.error('✗ Firestore 저장 오류:', newStudent.name, error.code, error.message)
         }
 
         console.log('✓ 상태 업데이트')
-        setStudents([...students, ...newStudents])
+        setStudents([...students, newStudent])
       }
 
       console.log('폼 초기화')
@@ -121,13 +98,7 @@ function StudentManagement({ students, setStudents }) {
   const handleDeleteStudent = async (id) => {
     if (confirm('학생을 삭제하시겠습니까?')) {
       try {
-        // localStorage에서 삭제
-        const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-        const filtered = savedStudents.filter(s => s.id !== id)
-        localStorage.setItem('students-data', JSON.stringify(filtered))
-        console.log('✓ localStorage 삭제')
-
-        // Firestore에서 삭제
+        // Firestore에서만 삭제
         const docRef = doc(db, 'students', id)
         await deleteDoc(docRef)
         console.log('✓ Firestore 삭제')
@@ -180,16 +151,10 @@ function StudentManagement({ students, setStudents }) {
 
           })
 
-          // localStorage에 먼저 저장
-          const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-          const allSavedStudents = [...savedStudents, ...newStudents]
-          localStorage.setItem('students-data', JSON.stringify(allSavedStudents))
-          console.log('✓ CSV localStorage 저장:', allSavedStudents.length)
-
-          // 상태 업데이트 (localStorage 반영)
+          // 상태 업데이트
           setStudents([...students, ...newStudents])
 
-          // Firestore에 저장
+          // Firestore에만 저장
           Promise.all(newStudents.map(student => {
             const docRef = doc(db, 'students', student.id)
             return setDoc(docRef, student)
@@ -233,16 +198,10 @@ function StudentManagement({ students, setStudents }) {
 
           })
 
-          // localStorage에 먼저 저장
-          const savedStudents = JSON.parse(localStorage.getItem('students-data') || '[]')
-          const allSavedStudents = [...savedStudents, ...newStudents]
-          localStorage.setItem('students-data', JSON.stringify(allSavedStudents))
-          console.log('✓ CSV localStorage 저장:', allSavedStudents.length)
-
-          // 상태 업데이트 (localStorage 반영)
+          // 상태 업데이트
           setStudents([...students, ...newStudents])
 
-          // Firestore에 저장
+          // Firestore에만 저장
           Promise.all(newStudents.map(student => {
             const docRef = doc(db, 'students', student.id)
             return setDoc(docRef, student)
