@@ -811,7 +811,7 @@ export const initialGroupsData = {
           "grade": 3
         }
       ],
-      "leader": "엄지율"
+      "leader": "김민서"
     },
     "3조": {
       "members": [
@@ -872,7 +872,7 @@ export const initialGroupsData = {
           "grade": 3
         }
       ],
-      "leader": "김민서"
+      "leader": "엄지율"
     },
     "4조": {
       "members": [
