@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { db } from '../../firebase'
-import { collection, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore'
+import { collection, onSnapshot, doc, setDoc, getDoc, query, where } from 'firebase/firestore'
 import './TeacherCommentManagement.css'
 
 function TeacherCommentManagement() {
@@ -27,15 +27,29 @@ function TeacherCommentManagement() {
     return () => unsubscribe()
   }, [])
 
-  // 학급 선택 변경 시 학생 명단 업데이트 (임시 - 나중에 Firestore에서 로드)
+  // Firestore에서 실제 학생 명단 로드
   useEffect(() => {
-    const mockStudents = [
-      { id: `${selectedGrade}-${selectedClass}-1`, number: 1, name: '학생1', grade: selectedGrade, class: selectedClass },
-      { id: `${selectedGrade}-${selectedClass}-2`, number: 2, name: '학생2', grade: selectedGrade, class: selectedClass },
-      { id: `${selectedGrade}-${selectedClass}-3`, number: 3, name: '학생3', grade: selectedGrade, class: selectedClass },
-    ]
-    setStudents(mockStudents)
-    setSelectedStudent(null)
+    const q = query(
+      collection(db, 'students'),
+      where('grade', '==', selectedGrade),
+      where('class', '==', selectedClass)
+    )
+
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const loadedStudents = []
+      snapshot.forEach(doc => {
+        loadedStudents.push({
+          id: doc.id,
+          ...doc.data()
+        })
+      })
+      // 번호 순서대로 정렬
+      loadedStudents.sort((a, b) => parseInt(a.number) - parseInt(b.number))
+      setStudents(loadedStudents)
+      setSelectedStudent(null)
+    })
+
+    return () => unsubscribe()
   }, [selectedGrade, selectedClass])
 
   const handleAddRecord = async () => {
