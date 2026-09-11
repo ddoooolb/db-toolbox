@@ -73,9 +73,9 @@ function DanceEvaluation() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const groupsData = JSON.parse(localStorage.getItem('groups-data') || '{}')
-      // localStorage에 데이터가 없으면 initialGroupsData 사용
-      const dataToUse = Object.keys(groupsData).length > 0 ? groupsData : initialGroupsData
+      // localStorage 초기화 (항상 최신 데이터 사용)
+      localStorage.removeItem('groups-data')
+      const dataToUse = initialGroupsData
       const builtClasses = {}
 
       // 클래스를 번호 순서로 정렬
