@@ -762,13 +762,6 @@ export const initialGroupsData = {
     "2조": {
       "members": [
         {
-          "id": 0.2426613781,
-          "name": "엄지율",
-          "number": "16",
-          "class": "3-1",
-          "grade": 3
-        },
-        {
           "id": 0.8439815755,
           "name": "김윤서",
           "number": "8",
@@ -809,6 +802,13 @@ export const initialGroupsData = {
           "number": "23",
           "class": "3-1",
           "grade": 3
+        },
+        {
+          "id": 0.82742e-8,
+          "name": "김민서",
+          "number": "6",
+          "class": "3-1",
+          "grade": 3
         }
       ],
       "leader": "김민서"
@@ -816,9 +816,9 @@ export const initialGroupsData = {
     "3조": {
       "members": [
         {
-          "id": 0.8737254833,
-          "name": "김민서",
-          "number": "6",
+          "id": 0.2426613781,
+          "name": "엄지율",
+          "number": "16",
           "class": "3-1",
           "grade": 3
         },
