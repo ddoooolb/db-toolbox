@@ -1,0 +1,152 @@
+.teacher-comment-management {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.selection-area {
+  display: flex;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 700;
+  color: #333;
+}
+
+.form-group select,
+.form-group textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.student-list {
+  margin: 30px 0;
+}
+
+.student-list h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.students {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.student-btn {
+  padding: 12px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.student-btn:hover {
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.student-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.record-area {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.record-area h3 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.record-area h4 {
+  color: #666;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.records-history {
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.record-item {
+  display: flex;
+  gap: 15px;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.record-item .date {
+  color: #999;
+  min-width: 80px;
+}
+
+.record-item .content {
+  color: #333;
+  flex: 1;
+}
+
+.btn-add {
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-right: 10px;
+}
+
+.btn-add:hover {
+  background: #218838;
+}
+
+.btn-generate {
+  padding: 12px 24px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  margin-top: 10px;
+}
+
+.btn-generate:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.btn-generate:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
