@@ -797,9 +797,9 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.2446761046,
-          "name": "오준석",
-          "number": "17",
+          "id": 0.0601916801,
+          "name": "함의진",
+          "number": "28",
           "class": "3-1",
           "grade": 3
         },
@@ -865,9 +865,9 @@ export const initialGroupsData = {
           "grade": 3
         },
         {
-          "id": 0.0601916801,
-          "name": "함의진",
-          "number": "28",
+          "id": 0.2446761046,
+          "name": "오준석",
+          "number": "17",
           "class": "3-1",
           "grade": 3
         }
