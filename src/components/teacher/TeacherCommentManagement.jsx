@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { db } from '../../firebase'
-import { collection, onSnapshot, doc, setDoc, getDoc, query, where } from 'firebase/firestore'
+import { collection, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore'
+import { initialGroupsData } from '../../data/groupsData'
 import './TeacherCommentManagement.css'
 
 function TeacherCommentManagement() {
-  console.log('🎓 TeacherCommentManagement 컴포넌트 로드됨')
-
   const [selectedGrade, setSelectedGrade] = useState('1')
   const [selectedClass, setSelectedClass] = useState('1')
   const [selectedStudent, setSelectedStudent] = useState(null)
@@ -29,33 +28,35 @@ function TeacherCommentManagement() {
     return () => unsubscribe()
   }, [])
 
-  // Firestore에서 실제 학생 명단 로드
+  // groupsData에서 학생 명단 로드
   useEffect(() => {
-    const q = query(
-      collection(db, 'students'),
-      where('grade', '==', parseInt(selectedGrade)),
-      where('class', '==', parseInt(selectedClass))
-    )
+    const classKey = `${selectedGrade}학년 ${selectedClass}반`
+    const classData = initialGroupsData[classKey]
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const loadedStudents = []
-      snapshot.forEach(doc => {
+    if (!classData) {
+      setStudents([])
+      return
+    }
+
+    const loadedStudents = []
+
+    // 모든 조의 학생들 수집
+    Object.entries(classData).forEach(([groupName, groupData]) => {
+      groupData.members?.forEach(member => {
         loadedStudents.push({
-          id: doc.id,
-          ...doc.data()
+          id: `${selectedGrade}-${selectedClass}-${member.number}`,
+          grade: selectedGrade,
+          class: selectedClass,
+          number: String(member.number),
+          name: member.name
         })
       })
-      // 번호 순서대로 정렬
-      loadedStudents.sort((a, b) => parseInt(a.number) - parseInt(b.number))
-      console.log(`🎓 ${selectedGrade}학년 ${selectedClass}반: ${loadedStudents.length}명 로드`)
-      if (loadedStudents.length > 0) {
-        console.log('첫 번째 학생:', loadedStudents[0])
-      }
-      setStudents(loadedStudents)
-      setSelectedStudent(null)
     })
 
-    return () => unsubscribe()
+    // 번호 순서대로 정렬
+    loadedStudents.sort((a, b) => parseInt(a.number) - parseInt(b.number))
+    setStudents(loadedStudents)
+    setSelectedStudent(null)
   }, [selectedGrade, selectedClass])
 
   const handleAddRecord = async () => {
