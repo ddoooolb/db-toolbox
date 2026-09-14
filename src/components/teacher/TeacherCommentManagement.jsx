@@ -12,6 +12,9 @@ function TeacherCommentManagement() {
   const [records, setRecords] = useState({})
   const [currentRecord, setCurrentRecord] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generatedComment, setGeneratedComment] = useState('')
+  const [editingRecordIdx, setEditingRecordIdx] = useState(null)
+  const [editingText, setEditingText] = useState('')
 
   // Firestore에서 교과세특 기록 실시간 로드
   useEffect(() => {
@@ -99,26 +102,96 @@ function TeacherCommentManagement() {
     }
   }
 
-  const handleGenerateComment = async () => {
+  const handleDeleteRecord = async (recordIdx) => {
+    if (!selectedStudent) return
+    if (!confirm('이 기록을 삭제하시겠습니까?')) return
+
+    try {
+      const recordId = selectedStudent.id
+      const docRef = doc(db, 'teacher-comments', recordId)
+      const docSnap = await getDoc(docRef)
+
+      if (docSnap.exists()) {
+        const updatedRecords = docSnap.data().records || []
+        updatedRecords.splice(recordIdx, 1)
+
+        await setDoc(docRef, {
+          ...docSnap.data(),
+          records: updatedRecords
+        })
+
+        alert('기록이 삭제되었습니다')
+      }
+    } catch (error) {
+      console.error('삭제 오류:', error)
+      alert('삭제 중 오류가 발생했습니다')
+    }
+  }
+
+  const handleEditRecord = (recordIdx) => {
+    const studentData = records[selectedStudent.id]
+    if (studentData?.records?.[recordIdx]) {
+      setEditingRecordIdx(recordIdx)
+      setEditingText(studentData.records[recordIdx].content)
+    }
+  }
+
+  const handleSaveEditRecord = async (recordIdx) => {
+    if (!selectedStudent) return
+
+    try {
+      const recordId = selectedStudent.id
+      const docRef = doc(db, 'teacher-comments', recordId)
+      const docSnap = await getDoc(docRef)
+
+      if (docSnap.exists()) {
+        const updatedRecords = docSnap.data().records || []
+        if (updatedRecords[recordIdx]) {
+          updatedRecords[recordIdx].content = editingText
+          updatedRecords[recordIdx].timestamp = new Date()
+
+          await setDoc(docRef, {
+            ...docSnap.data(),
+            records: updatedRecords
+          })
+
+          setEditingRecordIdx(null)
+          setEditingText('')
+          alert('기록이 수정되었습니다')
+        }
+      }
+    } catch (error) {
+      console.error('수정 오류:', error)
+      alert('수정 중 오류가 발생했습니다')
+    }
+  }
+
+  const handleSaveGeneratedComment = async () => {
     if (!selectedStudent) {
       alert('학생을 선택해주세요')
       return
     }
 
-    setIsGenerating(true)
-    try {
-      const studentData = records[selectedStudent.id]
-      if (!studentData || !studentData.records || studentData.records.length === 0) {
-        alert('기록이 없습니다')
-        return
-      }
+    if (!generatedComment.trim()) {
+      alert('생기부 내용을 입력해주세요')
+      return
+    }
 
-      // Claude API 호출 (임시)
-      alert('교과세특 생성 기능은 개발 중입니다')
+    try {
+      const recordId = selectedStudent.id
+      const docRef = doc(db, 'teacher-comments', recordId)
+
+      await setDoc(docRef, {
+        ...records[recordId],
+        generatedComment: generatedComment,
+        commentSavedAt: new Date().toISOString().split('T')[0]
+      }, { merge: true })
+
+      alert('생기부가 저장되었습니다')
+      setGeneratedComment('')
     } catch (error) {
-      console.error('생성 오류:', error)
-    } finally {
-      setIsGenerating(false)
+      console.error('저장 오류:', error)
+      alert('저장 중 오류가 발생했습니다')
     }
   }
 
@@ -189,18 +262,67 @@ function TeacherCommentManagement() {
             <h4>누적 기록</h4>
             {records[selectedStudent.id]?.records?.map((record, idx) => (
               <div key={idx} className="record-item">
-                <span className="date">{record.date}</span>
-                <span className="content">{record.content}</span>
+                {editingRecordIdx === idx ? (
+                  <div className="record-edit">
+                    <textarea
+                      value={editingText}
+                      onChange={(e) => setEditingText(e.target.value)}
+                      rows={3}
+                    />
+                    <div className="edit-buttons">
+                      <button
+                        className="btn-save-edit"
+                        onClick={() => handleSaveEditRecord(idx)}
+                      >
+                        저장
+                      </button>
+                      <button
+                        className="btn-cancel-edit"
+                        onClick={() => setEditingRecordIdx(null)}
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <span className="date">📅 {record.date}</span>
+                    <span className="content">{record.content}</span>
+                    <div className="record-actions">
+                      <button
+                        className="btn-edit"
+                        onClick={() => handleEditRecord(idx)}
+                      >
+                        수정
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDeleteRecord(idx)}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )) || <p>기록이 없습니다</p>}
           </div>
 
+          <div className="form-group">
+            <label>생기부 입력 (Claude.ai에서 생성한 텍스트)</label>
+            <textarea
+              value={generatedComment}
+              onChange={(e) => setGeneratedComment(e.target.value)}
+              placeholder="Claude.ai에서 생성한 생기부 내용을 붙여넣으세요"
+              rows={6}
+            />
+          </div>
+
           <button
             className="btn-generate"
-            onClick={handleGenerateComment}
-            disabled={isGenerating}
+            onClick={handleSaveGeneratedComment}
           >
-            {isGenerating ? '생성 중...' : '교과세특 생성'}
+            생기부 저장
           </button>
         </div>
       )}
