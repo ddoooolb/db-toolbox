@@ -22,7 +22,14 @@ function DanceReflection() {
   useEffect(() => {
     if (!selectedNumber) {
       setStudentName('')
-      setReflection('')
+      setReflections({
+        role: '',
+        roleEffort: '',
+        technique: '',
+        teamwork: '',
+        growth: '',
+        overall: ''
+      })
       return
     }
 
