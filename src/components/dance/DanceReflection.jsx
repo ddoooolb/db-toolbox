@@ -9,7 +9,14 @@ function DanceReflection() {
   const [selectedClass, setSelectedClass] = useState('1')
   const [selectedNumber, setSelectedNumber] = useState('')
   const [studentName, setStudentName] = useState('')
-  const [reflection, setReflection] = useState('')
+  const [reflections, setReflections] = useState({
+    role: '',
+    roleEffort: '',
+    technique: '',
+    teamwork: '',
+    growth: '',
+    overall: ''
+  })
   const [isSaved, setIsSaved] = useState(false)
 
   useEffect(() => {
@@ -49,10 +56,17 @@ function DanceReflection() {
       const docRef = doc(db, 'teacher-comments', studentId)
       const docSnap = await getDoc(docRef)
 
-      if (docSnap.exists() && docSnap.data().reflection) {
-        setReflection(docSnap.data().reflection)
+      if (docSnap.exists() && docSnap.data().reflections) {
+        setReflections(docSnap.data().reflections)
       } else {
-        setReflection('')
+        setReflections({
+          role: '',
+          roleEffort: '',
+          technique: '',
+          teamwork: '',
+          growth: '',
+          overall: ''
+        })
       }
     } catch (error) {
       console.error('소감문 로드 오류:', error)
@@ -62,6 +76,11 @@ function DanceReflection() {
   const handleSaveReflection = async () => {
     if (!selectedNumber || !studentName) {
       alert('학생을 선택해주세요')
+      return
+    }
+
+    if (!Object.values(reflections).some(val => val.trim())) {
+      alert('최소 하나의 소감을 입력해주세요')
       return
     }
 
@@ -79,7 +98,7 @@ function DanceReflection() {
         class: selectedClass,
         number: selectedNumber,
         name: studentName,
-        reflection: reflection,
+        reflections: reflections,
         reflectionSavedAt: new Date().toISOString().split('T')[0]
       }, { merge: true })
 
@@ -153,14 +172,66 @@ function DanceReflection() {
         <div className="reflection-area">
           <h3>{selectedNumber}번 {studentName}의 소감</h3>
 
-          <div className="form-group">
-            <label>이번 수업에 대한 소감과 느낀 점을 자유롭게 작성해주세요</label>
-            <textarea
-              value={reflection}
-              onChange={(e) => setReflection(e.target.value)}
-              placeholder="예: 이번 안무를 배우면서 느낀 점, 어려웠던 부분, 팀원과의 협력 과정 등..."
-              rows={8}
-            />
+          <div className="reflection-questions">
+            <div className="question-group">
+              <label>1️⃣ 【역할】이번 안무에서 너의 역할은 뭐였어?</label>
+              <textarea
+                value={reflections.role}
+                onChange={(e) => setReflections({...reflections, role: e.target.value})}
+                placeholder="예: 팀의 리더로써, 센터 포지션에서..."
+                rows={3}
+              />
+            </div>
+
+            <div className="question-group">
+              <label>2️⃣ 【역할 수행】그 역할을 잘 수행하기 위해 뭘 노력했어?</label>
+              <textarea
+                value={reflections.roleEffort}
+                onChange={(e) => setReflections({...reflections, roleEffort: e.target.value})}
+                placeholder="예: 팀원들을 챙기고, 동작을 정확하게 연습하고..."
+                rows={3}
+              />
+            </div>
+
+            <div className="question-group">
+              <label>3️⃣ 【기술】기술이나 동작 면에서 가장 어려웠던 부분은?</label>
+              <textarea
+                value={reflections.technique}
+                onChange={(e) => setReflections({...reflections, technique: e.target.value})}
+                placeholder="예: 복잡한 스텝, 리듬 맞추기, 표현력..."
+                rows={3}
+              />
+            </div>
+
+            <div className="question-group">
+              <label>4️⃣ 【팀협력】팀원들과 함께 움직일 때 어떤 경험을 했어?</label>
+              <textarea
+                value={reflections.teamwork}
+                onChange={(e) => setReflections({...reflections, teamwork: e.target.value})}
+                placeholder="예: 서로 도와주고, 호흡을 맞추고, 함께 성장하고..."
+                rows={3}
+              />
+            </div>
+
+            <div className="question-group">
+              <label>5️⃣ 【성장】이 활동을 통해 배우거나 발전한 점은?</label>
+              <textarea
+                value={reflections.growth}
+                onChange={(e) => setReflections({...reflections, growth: e.target.value})}
+                placeholder="예: 표현력이 좋아졌고, 팀워크의 중요성을 알았고..."
+                rows={3}
+              />
+            </div>
+
+            <div className="question-group">
+              <label>6️⃣ 【총평】이번 수업 전체에 대한 자유로운 소감이나 기타 느낀 점은?</label>
+              <textarea
+                value={reflections.overall}
+                onChange={(e) => setReflections({...reflections, overall: e.target.value})}
+                placeholder="예: 재미있었어, 힘들었지만 보람있었어, 다음에 더 잘하고 싶어..."
+                rows={3}
+              />
+            </div>
           </div>
 
           <button

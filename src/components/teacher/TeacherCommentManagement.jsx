@@ -183,8 +183,14 @@ function TeacherCommentManagement() {
       exportText += `- ${record.date}: ${record.content}\n`
     })
 
-    if (studentData.reflection) {
-      exportText += `\n소감문:\n${studentData.reflection}`
+    if (studentData.reflections) {
+      exportText += `\n소감문:\n`
+      if (studentData.reflections.role) exportText += `- 역할: ${studentData.reflections.role}\n`
+      if (studentData.reflections.roleEffort) exportText += `- 역할 수행: ${studentData.reflections.roleEffort}\n`
+      if (studentData.reflections.technique) exportText += `- 기술: ${studentData.reflections.technique}\n`
+      if (studentData.reflections.teamwork) exportText += `- 팀협력: ${studentData.reflections.teamwork}\n`
+      if (studentData.reflections.growth) exportText += `- 성장: ${studentData.reflections.growth}\n`
+      if (studentData.reflections.overall) exportText += `- 총평: ${studentData.reflections.overall}\n`
     }
 
     navigator.clipboard.writeText(exportText)
@@ -209,8 +215,14 @@ function TeacherCommentManagement() {
         studentData.records.forEach(record => {
           classRecords += `- ${record.date}: ${record.content}\n`
         })
-        if (studentData.reflection) {
-          classRecords += `소감문: ${studentData.reflection}\n`
+        if (studentData.reflections) {
+          classRecords += `소감문:\n`
+          if (studentData.reflections.role) classRecords += `  - 역할: ${studentData.reflections.role}\n`
+          if (studentData.reflections.roleEffort) classRecords += `  - 역할 수행: ${studentData.reflections.roleEffort}\n`
+          if (studentData.reflections.technique) classRecords += `  - 기술: ${studentData.reflections.technique}\n`
+          if (studentData.reflections.teamwork) classRecords += `  - 팀협력: ${studentData.reflections.teamwork}\n`
+          if (studentData.reflections.growth) classRecords += `  - 성장: ${studentData.reflections.growth}\n`
+          if (studentData.reflections.overall) classRecords += `  - 총평: ${studentData.reflections.overall}\n`
         }
         classRecords += '\n'
       }
@@ -261,8 +273,14 @@ function TeacherCommentManagement() {
             student.data.records.forEach(record => {
               allRecords += `- ${record.date}: ${record.content}\n`
             })
-            if (student.data.reflection) {
-              allRecords += `소감문: ${student.data.reflection}\n`
+            if (student.data.reflections) {
+              allRecords += `소감문:\n`
+              if (student.data.reflections.role) allRecords += `  - 역할: ${student.data.reflections.role}\n`
+              if (student.data.reflections.roleEffort) allRecords += `  - 역할 수행: ${student.data.reflections.roleEffort}\n`
+              if (student.data.reflections.technique) allRecords += `  - 기술: ${student.data.reflections.technique}\n`
+              if (student.data.reflections.teamwork) allRecords += `  - 팀협력: ${student.data.reflections.teamwork}\n`
+              if (student.data.reflections.growth) allRecords += `  - 성장: ${student.data.reflections.growth}\n`
+              if (student.data.reflections.overall) allRecords += `  - 총평: ${student.data.reflections.overall}\n`
             }
             allRecords += '\n'
           })
@@ -398,11 +416,40 @@ function TeacherCommentManagement() {
             )) || <p>기록이 없습니다</p>}
           </div>
 
-          {records[selectedStudent.id]?.reflection && (
+          {records[selectedStudent.id]?.reflections && (
             <div className="reflection-display">
               <h4>💭 학생 소감문</h4>
               <div className="reflection-content">
-                {records[selectedStudent.id].reflection}
+                {records[selectedStudent.id].reflections.role && (
+                  <div className="reflection-item">
+                    <strong>【역할】</strong> {records[selectedStudent.id].reflections.role}
+                  </div>
+                )}
+                {records[selectedStudent.id].reflections.roleEffort && (
+                  <div className="reflection-item">
+                    <strong>【역할 수행】</strong> {records[selectedStudent.id].reflections.roleEffort}
+                  </div>
+                )}
+                {records[selectedStudent.id].reflections.technique && (
+                  <div className="reflection-item">
+                    <strong>【기술】</strong> {records[selectedStudent.id].reflections.technique}
+                  </div>
+                )}
+                {records[selectedStudent.id].reflections.teamwork && (
+                  <div className="reflection-item">
+                    <strong>【팀협력】</strong> {records[selectedStudent.id].reflections.teamwork}
+                  </div>
+                )}
+                {records[selectedStudent.id].reflections.growth && (
+                  <div className="reflection-item">
+                    <strong>【성장】</strong> {records[selectedStudent.id].reflections.growth}
+                  </div>
+                )}
+                {records[selectedStudent.id].reflections.overall && (
+                  <div className="reflection-item">
+                    <strong>【총평】</strong> {records[selectedStudent.id].reflections.overall}
+                  </div>
+                )}
               </div>
             </div>
           )}
