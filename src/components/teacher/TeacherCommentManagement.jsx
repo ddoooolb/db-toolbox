@@ -45,6 +45,10 @@ function TeacherCommentManagement() {
       })
       // 번호 순서대로 정렬
       loadedStudents.sort((a, b) => parseInt(a.number) - parseInt(b.number))
+      console.log(`🎓 ${selectedGrade}학년 ${selectedClass}반: ${loadedStudents.length}명 로드`)
+      if (loadedStudents.length > 0) {
+        console.log('첫 번째 학생:', loadedStudents[0])
+      }
       setStudents(loadedStudents)
       setSelectedStudent(null)
     })
