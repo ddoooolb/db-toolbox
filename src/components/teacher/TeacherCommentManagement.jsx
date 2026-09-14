@@ -4,6 +4,8 @@ import { collection, onSnapshot, doc, setDoc, getDoc, query, where } from 'fireb
 import './TeacherCommentManagement.css'
 
 function TeacherCommentManagement() {
+  console.log('🎓 TeacherCommentManagement 컴포넌트 로드됨')
+
   const [selectedGrade, setSelectedGrade] = useState('1')
   const [selectedClass, setSelectedClass] = useState('1')
   const [selectedStudent, setSelectedStudent] = useState(null)
@@ -126,18 +128,24 @@ function TeacherCommentManagement() {
       <div className="selection-area">
         <div className="form-group">
           <label>학년</label>
-          <select value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)}>
+          <select value={selectedGrade} onChange={(e) => {
+            console.log('학년 변경:', e.target.value)
+            setSelectedGrade(e.target.value)
+          }}>
             {[1, 2, 3].map(g => (
-              <option key={g} value={g}>{g}학년</option>
+              <option key={g} value={String(g)}>{g}학년</option>
             ))}
           </select>
         </div>
 
         <div className="form-group">
           <label>반</label>
-          <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
+          <select value={selectedClass} onChange={(e) => {
+            console.log('반 변경:', e.target.value)
+            setSelectedClass(e.target.value)
+          }}>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(c => (
-              <option key={c} value={c}>{c}반</option>
+              <option key={c} value={String(c)}>{c}반</option>
             ))}
           </select>
         </div>
