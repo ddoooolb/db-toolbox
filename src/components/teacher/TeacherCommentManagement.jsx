@@ -11,8 +11,6 @@ function TeacherCommentManagement() {
   const [students, setStudents] = useState([])
   const [records, setRecords] = useState({})
   const [currentRecord, setCurrentRecord] = useState('')
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [generatedComment, setGeneratedComment] = useState('')
   const [editingRecordIdx, setEditingRecordIdx] = useState(null)
   const [editingText, setEditingText] = useState('')
 
@@ -166,38 +164,115 @@ function TeacherCommentManagement() {
     }
   }
 
-  const handleSaveGeneratedComment = async () => {
+  const handleExportStudentRecords = () => {
     if (!selectedStudent) {
       alert('학생을 선택해주세요')
       return
     }
 
-    if (!generatedComment.trim()) {
-      alert('생기부 내용을 입력해주세요')
+    const studentData = records[selectedStudent.id]
+    if (!studentData?.records || studentData.records.length === 0) {
+      alert('기록이 없습니다')
       return
     }
 
-    try {
-      const recordId = selectedStudent.id
-      const docRef = doc(db, 'teacher-comments', recordId)
+    const recordsText = studentData.records
+      .map(record => `${record.date}: ${record.content}`)
+      .join('\n')
 
-      await setDoc(docRef, {
-        ...records[recordId],
-        generatedComment: generatedComment,
-        commentSavedAt: new Date().toISOString().split('T')[0]
-      }, { merge: true })
+    const exportText = `[${selectedStudent.grade}학년 ${selectedStudent.class}반 ${selectedStudent.number}번 ${selectedStudent.name}]\n\n${recordsText}`
 
-      alert('생기부가 저장되었습니다')
-      setGeneratedComment('')
-    } catch (error) {
-      console.error('저장 오류:', error)
-      alert('저장 중 오류가 발생했습니다')
+    navigator.clipboard.writeText(exportText)
+    alert('클립보드에 복사되었습니다!\nClaude.ai에 붙여넣으세요.')
+  }
+
+  const handleExportClassRecords = () => {
+    if (!students || students.length === 0) {
+      alert('학생이 없습니다')
+      return
     }
+
+    let classRecords = `【${selectedGrade}학년 ${selectedClass}반 누가기록】\n\n`
+
+    students.forEach(student => {
+      const studentData = records[student.id]
+      if (studentData?.records && studentData.records.length > 0) {
+        classRecords += `[${student.number}번 ${student.name}]\n`
+        studentData.records.forEach(record => {
+          classRecords += `- ${record.date}: ${record.content}\n`
+        })
+        classRecords += '\n'
+      }
+    })
+
+    if (classRecords === `【${selectedGrade}학년 ${selectedClass}반 누가기록】\n\n`) {
+      alert('기록이 없습니다')
+      return
+    }
+
+    navigator.clipboard.writeText(classRecords)
+    alert('클래스 전체 기록이 클립보드에 복사되었습니다!\nClaude.ai에 붙여넣으세요.')
+  }
+
+  const handleExportAllRecords = () => {
+    let allRecords = `【전체 누가기록】\n\n`
+    let hasRecords = false
+
+    for (let grade = 1; grade <= 3; grade++) {
+      for (let classNum = 1; classNum <= 12; classNum++) {
+        const classKey = `${grade}학년 ${classNum}반`
+        const classData = initialGroupsData[classKey]
+
+        if (!classData) continue
+
+        const classRecords = []
+        Object.entries(classData).forEach(([groupName, groupData]) => {
+          groupData.members?.forEach(member => {
+            const studentId = `${grade}-${classNum}-${member.number}`
+            const studentData = records[studentId]
+            if (studentData?.records && studentData.records.length > 0) {
+              classRecords.push({
+                number: member.number,
+                name: member.name,
+                data: studentData
+              })
+            }
+          })
+        })
+
+        if (classRecords.length > 0) {
+          hasRecords = true
+          allRecords += `【${grade}학년 ${classNum}반】\n`
+          classRecords.sort((a, b) => a.number - b.number)
+          classRecords.forEach(student => {
+            allRecords += `[${student.number}번 ${student.name}]\n`
+            student.data.records.forEach(record => {
+              allRecords += `- ${record.date}: ${record.content}\n`
+            })
+            allRecords += '\n'
+          })
+          allRecords += '\n'
+        }
+      }
+    }
+
+    if (!hasRecords) {
+      alert('기록이 없습니다')
+      return
+    }
+
+    navigator.clipboard.writeText(allRecords)
+    alert('모든 반의 기록이 클립보드에 복사되었습니다!\nClaude.ai에 붙여넣으세요.')
   }
 
   return (
     <div className="teacher-comment-management">
-      <h2>교과세특 관리</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <h2>교과세특 관리</h2>
+        <button className="btn-export-all" onClick={handleExportAllRecords}>
+          📚 모든 반 내보내기
+        </button>
+      </div>
 
       <div className="selection-area">
         <div className="form-group">
@@ -308,22 +383,14 @@ function TeacherCommentManagement() {
             )) || <p>기록이 없습니다</p>}
           </div>
 
-          <div className="form-group">
-            <label>생기부 입력 (Claude.ai에서 생성한 텍스트)</label>
-            <textarea
-              value={generatedComment}
-              onChange={(e) => setGeneratedComment(e.target.value)}
-              placeholder="Claude.ai에서 생성한 생기부 내용을 붙여넣으세요"
-              rows={6}
-            />
+          <div className="export-buttons">
+            <button className="btn-export" onClick={handleExportStudentRecords}>
+              📋 학생 기록 내보내기
+            </button>
+            <button className="btn-export-class" onClick={handleExportClassRecords}>
+              📊 반 전체 기록 내보내기
+            </button>
           </div>
-
-          <button
-            className="btn-generate"
-            onClick={handleSaveGeneratedComment}
-          >
-            생기부 저장
-          </button>
         </div>
       )}
     </div>
