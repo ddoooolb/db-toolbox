@@ -208,14 +208,21 @@ function TeacherCommentManagement() {
 
     students.forEach(student => {
       const studentData = records[student.id]
-      if (studentData?.records && studentData.records.length > 0) {
-        hasRecords = true
+      const hasRecords = studentData?.records && studentData.records.length > 0
+      const hasReflections = studentData?.reflections && Object.values(studentData.reflections).some(val => val?.trim())
+
+      if (hasRecords || hasReflections) {
+        hasRecords && (hasRecords = true)
         classRecords += `[${student.number}번 ${student.name}]\n`
-        classRecords += '누가기록:\n'
-        studentData.records.forEach(record => {
-          classRecords += `- ${record.date}: ${record.content}\n`
-        })
-        if (studentData.reflections) {
+
+        if (hasRecords) {
+          classRecords += '누가기록:\n'
+          studentData.records.forEach(record => {
+            classRecords += `- ${record.date}: ${record.content}\n`
+          })
+        }
+
+        if (hasReflections) {
           classRecords += `소감문:\n`
           if (studentData.reflections.role) classRecords += `  - 역할: ${studentData.reflections.role}\n`
           if (studentData.reflections.roleEffort) classRecords += `  - 역할 수행: ${studentData.reflections.roleEffort}\n`
@@ -268,12 +275,19 @@ function TeacherCommentManagement() {
           allRecords += `【${grade}학년 ${classNum}반】\n`
           classRecords.sort((a, b) => a.number - b.number)
           classRecords.forEach(student => {
+            const hasRecords = student.data.records && student.data.records.length > 0
+            const hasReflections = student.data.reflections && Object.values(student.data.reflections).some(val => val?.trim())
+
             allRecords += `[${student.number}번 ${student.name}]\n`
-            allRecords += '누가기록:\n'
-            student.data.records.forEach(record => {
-              allRecords += `- ${record.date}: ${record.content}\n`
-            })
-            if (student.data.reflections) {
+
+            if (hasRecords) {
+              allRecords += '누가기록:\n'
+              student.data.records.forEach(record => {
+                allRecords += `- ${record.date}: ${record.content}\n`
+              })
+            }
+
+            if (hasReflections) {
               allRecords += `소감문:\n`
               if (student.data.reflections.role) allRecords += `  - 역할: ${student.data.reflections.role}\n`
               if (student.data.reflections.roleEffort) allRecords += `  - 역할 수행: ${student.data.reflections.roleEffort}\n`
