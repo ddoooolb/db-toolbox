@@ -33,8 +33,8 @@ function TeacherCommentManagement() {
   useEffect(() => {
     const q = query(
       collection(db, 'students'),
-      where('grade', '==', selectedGrade),
-      where('class', '==', selectedClass)
+      where('grade', '==', parseInt(selectedGrade)),
+      where('class', '==', parseInt(selectedClass))
     )
 
     const unsubscribe = onSnapshot(q, snapshot => {
