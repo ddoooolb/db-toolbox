@@ -176,11 +176,16 @@ function TeacherCommentManagement() {
       return
     }
 
-    const recordsText = studentData.records
-      .map(record => `${record.date}: ${record.content}`)
-      .join('\n')
+    let exportText = `[${selectedStudent.grade}학년 ${selectedStudent.class}반 ${selectedStudent.number}번 ${selectedStudent.name}]\n\n`
 
-    const exportText = `[${selectedStudent.grade}학년 ${selectedStudent.class}반 ${selectedStudent.number}번 ${selectedStudent.name}]\n\n${recordsText}`
+    exportText += '누가기록:\n'
+    studentData.records.forEach(record => {
+      exportText += `- ${record.date}: ${record.content}\n`
+    })
+
+    if (studentData.reflection) {
+      exportText += `\n소감문:\n${studentData.reflection}`
+    }
 
     navigator.clipboard.writeText(exportText)
     alert('클립보드에 복사되었습니다!\nClaude.ai에 붙여넣으세요.')
@@ -192,20 +197,26 @@ function TeacherCommentManagement() {
       return
     }
 
-    let classRecords = `【${selectedGrade}학년 ${selectedClass}반 누가기록】\n\n`
+    let classRecords = `【${selectedGrade}학년 ${selectedClass}반】\n\n`
+    let hasRecords = false
 
     students.forEach(student => {
       const studentData = records[student.id]
       if (studentData?.records && studentData.records.length > 0) {
+        hasRecords = true
         classRecords += `[${student.number}번 ${student.name}]\n`
+        classRecords += '누가기록:\n'
         studentData.records.forEach(record => {
           classRecords += `- ${record.date}: ${record.content}\n`
         })
+        if (studentData.reflection) {
+          classRecords += `소감문: ${studentData.reflection}\n`
+        }
         classRecords += '\n'
       }
     })
 
-    if (classRecords === `【${selectedGrade}학년 ${selectedClass}반 누가기록】\n\n`) {
+    if (!hasRecords) {
       alert('기록이 없습니다')
       return
     }
@@ -246,9 +257,13 @@ function TeacherCommentManagement() {
           classRecords.sort((a, b) => a.number - b.number)
           classRecords.forEach(student => {
             allRecords += `[${student.number}번 ${student.name}]\n`
+            allRecords += '누가기록:\n'
             student.data.records.forEach(record => {
               allRecords += `- ${record.date}: ${record.content}\n`
             })
+            if (student.data.reflection) {
+              allRecords += `소감문: ${student.data.reflection}\n`
+            }
             allRecords += '\n'
           })
           allRecords += '\n'
@@ -334,7 +349,7 @@ function TeacherCommentManagement() {
           </button>
 
           <div className="records-history">
-            <h4>누적 기록</h4>
+            <h4>📝 누적 기록</h4>
             {records[selectedStudent.id]?.records?.map((record, idx) => (
               <div key={idx} className="record-item">
                 {editingRecordIdx === idx ? (
@@ -382,6 +397,15 @@ function TeacherCommentManagement() {
               </div>
             )) || <p>기록이 없습니다</p>}
           </div>
+
+          {records[selectedStudent.id]?.reflection && (
+            <div className="reflection-display">
+              <h4>💭 학생 소감문</h4>
+              <div className="reflection-content">
+                {records[selectedStudent.id].reflection}
+              </div>
+            </div>
+          )}
 
           <div className="export-buttons">
             <button className="btn-export" onClick={handleExportStudentRecords}>
