@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { db } from '../../firebase'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc, onSnapshot, query, collection, where } from 'firebase/firestore'
 import { initialGroupsData } from '../../data/groupsData'
 import './DanceReflection.css'
 
@@ -22,6 +22,7 @@ function DanceReflectionGrade3() {
   const [isAdminMode, setIsAdminMode] = useState(false)
   const [adminPassInput, setAdminPassInput] = useState('')
   const [adminPassMsg, setAdminPassMsg] = useState({type: '', text: ''})
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
   useEffect(() => {
     if (!selectedNumber) {
@@ -58,6 +59,20 @@ function DanceReflectionGrade3() {
 
     if (foundName) {
       loadReflection(selectedGrade, selectedClass, selectedNumber)
+
+      // 제출 상태 실시간 감시
+      const classId = `${selectedGrade}학년 ${selectedClass}반`
+      const unsubscribe = onSnapshot(
+        query(collection(db, 'dance-submitted'),
+          where('classId', '==', classId),
+          where('studentName', '==', foundName)
+        ),
+        snapshot => {
+          setIsSubmitted(snapshot.docs.length > 0)
+        }
+      )
+
+      return () => unsubscribe()
     }
   }, [selectedClass, selectedNumber])
 
@@ -406,12 +421,50 @@ function DanceReflectionGrade3() {
             </div>
           </div>
 
-          <button
-            className={`btn-save ${isSaved ? 'saved' : ''}`}
-            onClick={handleSaveReflection}
-          >
-            {isSaved ? '✓ 저장됨' : '저장'}
-          </button>
+          {isSubmitted ? (
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+              <div style={{
+                flex: 1,
+                padding: '12px',
+                background: '#fff3cd',
+                border: '1px solid #ffc107',
+                borderRadius: '6px',
+                color: '#856404',
+                textAlign: 'center',
+                fontWeight: '600',
+                fontSize: '14px'
+              }}>
+                ✓ 이미 제출되었습니다
+              </div>
+              <button
+                onClick={() => {
+                  if (window.confirm('제출을 취소하시겠습니까?')) {
+                    // 초기화는 선생님만 할 수 있으므로, 메시지만 표시
+                    alert('선생님이 제출을 취소할 수 있습니다')
+                  }
+                }}
+                style={{
+                  padding: '12px 20px',
+                  background: '#ffcccb',
+                  color: '#c0392b',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '13px'
+                }}
+              >
+                🗑️ 제출 취소
+              </button>
+            </div>
+          ) : (
+            <button
+              className={`btn-save ${isSaved ? 'saved' : ''}`}
+              onClick={handleSaveReflection}
+            >
+              {isSaved ? '✓ 저장됨' : '저장'}
+            </button>
+          )}
         </div>
       )}
     </div>
