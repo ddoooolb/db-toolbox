@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from 'react'
 import StudentGroupManagement from '../admin/StudentGroupManagement'
 import { initialGroupsData } from '../../data/groupsData'
 import { db } from '../../firebase'
-import { collection, onSnapshot, doc, deleteDoc, setDoc, query, where } from 'firebase/firestore'
+import { collection, onSnapshot, doc, deleteDoc, setDoc, query, where, getDocs } from 'firebase/firestore'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -187,6 +187,37 @@ function DanceManagement() {
       unsubResultOverrides()
     }
   }, [selectedClass])
+
+  // 개별 학생 제출 초기화
+  const resetSubmitted = async (key) => {
+    if (!window.confirm('이 제출을 취소하시겠습니까?\n\n관련된 평가 데이터도 모두 삭제됩니다.')) {
+      return
+    }
+
+    const [evalType, name] = key.split('|')
+
+    try {
+      // Firestore에서 제출 상태 삭제
+      const submittedDocId = `${selectedClass}|${evalType}|${name}`
+      await deleteDoc(doc(db, 'dance-submitted', submittedDocId))
+
+      // 해당 학생의 평가 기록 모두 삭제
+      const keysToDelete = Object.keys(records).filter(k => {
+        const record = records[k]
+        return record.evalType === evalType && record.target === name
+      })
+
+      await Promise.all(keysToDelete.map(k => {
+        const recordKey = `${selectedClass}|${k}`
+        return deleteDoc(doc(db, 'dance-evaluations', recordKey))
+      }))
+
+      alert('✓ 제출이 취소되었습니다!')
+    } catch (e) {
+      console.error('제출 취소 실패:', e)
+      alert('제출 취소 중 오류가 발생했습니다')
+    }
+  }
 
   const loadData = () => {
     // Firestore 실시간 동기화로 처리됨
@@ -573,13 +604,26 @@ function DanceManagement() {
         <button
           onClick={() => {
             if (window.confirm(`${selectedClass}의 모든 평가 데이터를 삭제하시겠습니까?\n\n⚠️ 취소할 수 없습니다!`)) {
-              ['records', 'submitted', 'teacher-result', 'open'].forEach(type =>
-              )
-              setOpenState({})
-              setRecords({})
-              setSubmitted({})
-              setTeacherResults({})
-              alert('✓ 데이터가 초기화되었습니다!')
+              // Firestore에서 해당 클래스의 모든 평가 데이터 삭제
+              const deleteAllEvaluations = async () => {
+                try {
+                  const evalSnap = await getDocs(query(collection(db, 'dance-evaluations'), where('classId', '==', selectedClass)))
+                  evalSnap.forEach(doc => deleteDoc(doc.ref))
+
+                  const submitSnap = await getDocs(query(collection(db, 'dance-submitted'), where('classId', '==', selectedClass)))
+                  submitSnap.forEach(doc => deleteDoc(doc.ref))
+
+                  setOpenState({})
+                  setRecords({})
+                  setSubmitted({})
+                  setTeacherResults({})
+                  alert('✓ 데이터가 초기화되었습니다!')
+                } catch (e) {
+                  console.error('데이터 삭제 실패:', e)
+                  alert('데이터 삭제 중 오류가 발생했습니다')
+                }
+              }
+              deleteAllEvaluations()
             }
           }}
           style={{
@@ -645,16 +689,38 @@ function DanceManagement() {
                   return (
                     <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid var(--line)', alignItems: 'center', fontSize: '12px' }}>
                       <span>{name} — {evalType === 'round1' ? '1차' : '2차'}</span>
-                      <span style={{
-                        padding: '4px 10px',
-                        borderRadius: '12px',
-                        fontSize: '11px',
-                        fontWeight: '600',
-                        background: isSubmitted ? '#e8f5e9' : '#ffebee',
-                        color: isSubmitted ? '#2f9e6e' : '#c0392b'
-                      }}>
-                        {isSubmitted ? '✓ 제출' : '✕ 미제출'}
-                      </span>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          background: isSubmitted ? '#e8f5e9' : '#ffebee',
+                          color: isSubmitted ? '#2f9e6e' : '#c0392b'
+                        }}>
+                          {isSubmitted ? '✓ 제출' : '✕ 미제출'}
+                        </span>
+                        {isSubmitted && (
+                          <button
+                            onClick={() => resetSubmitted(key)}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              border: 'none',
+                              background: '#ffcccb',
+                              color: '#c0392b',
+                              cursor: 'pointer',
+                              fontWeight: '600',
+                              fontSize: '11px',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.background = '#ff9999'}
+                            onMouseLeave={(e) => e.target.style.background = '#ffcccb'}
+                          >
+                            🗑️ 초기화
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )
                 })
