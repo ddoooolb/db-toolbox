@@ -179,12 +179,26 @@ function DanceManagement() {
       }
     )
 
+    // Firestore에서 평가 열기/닫기 상태 읽기
+    const unsubOpenState = onSnapshot(
+      query(collection(db, 'dance-open'), where('classId', '==', selectedClass)),
+      snapshot => {
+        const openData = {}
+        snapshot.forEach(doc => {
+          const data = doc.data()
+          openData[data.evalType] = data.isOpen
+        })
+        setOpenState(openData)
+      }
+    )
+
     return () => {
       unsubEvals()
       unsubSubmitted()
       unsubTeacherResults()
       unsubOverrides()
       unsubResultOverrides()
+      unsubOpenState()
     }
   }, [selectedClass])
 
