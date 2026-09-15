@@ -18,6 +18,10 @@ function DanceReflectionGrade3() {
     overall: ''
   })
   const [isSaved, setIsSaved] = useState(false)
+  const [submitMsg, setSubmitMsg] = useState({type: '', text: ''})
+  const [isAdminMode, setIsAdminMode] = useState(false)
+  const [adminPassInput, setAdminPassInput] = useState('')
+  const [adminPassMsg, setAdminPassMsg] = useState({type: '', text: ''})
 
   useEffect(() => {
     if (!selectedNumber) {
@@ -82,12 +86,14 @@ function DanceReflectionGrade3() {
 
   const handleSaveReflection = async () => {
     if (!selectedNumber || !studentName) {
-      alert('학생을 선택해주세요')
+      setSubmitMsg({type: 'error', text: '학생을 선택해주세요'})
+      setTimeout(() => setSubmitMsg({type: '', text: ''}), 2000)
       return
     }
 
     if (!Object.values(reflections).some(val => val.trim())) {
-      alert('최소 하나의 소감을 입력해주세요')
+      setSubmitMsg({type: 'error', text: '최소 하나의 소감을 입력해주세요'})
+      setTimeout(() => setSubmitMsg({type: '', text: ''}), 2000)
       return
     }
 
@@ -109,12 +115,58 @@ function DanceReflectionGrade3() {
         reflectionSavedAt: new Date().toISOString().split('T')[0]
       }, { merge: true })
 
-      setIsSaved(true)
-      setTimeout(() => setIsSaved(false), 2000)
-      alert('소감문이 저장되었습니다')
+      setSubmitMsg({type: 'success', text: '✓ 저장되었습니다'})
+      setTimeout(() => setSubmitMsg({type: '', text: ''}), 2000)
+
+      // 저장 후 입력창 초기화
+      setReflections({
+        role: '',
+        roleEffort: '',
+        technique: '',
+        teamwork: '',
+        growth: '',
+        overall: ''
+      })
     } catch (error) {
       console.error('저장 오류:', error)
-      alert('저장 중 오류가 발생했습니다')
+      setSubmitMsg({type: 'error', text: '저장 중 오류가 발생했습니다'})
+      setTimeout(() => setSubmitMsg({type: '', text: ''}), 2000)
+    }
+  }
+
+  const handleAdminLogin = async () => {
+    if (!adminPassInput.trim()) {
+      setAdminPassMsg({type: 'error', text: '비밀번호를 입력해주세요'})
+      setTimeout(() => setAdminPassMsg({type: '', text: ''}), 2000)
+      return
+    }
+
+    try {
+      const docRef = doc(db, 'config', 'admin-password')
+      const docSnap = await getDoc(docRef)
+
+      if (!docSnap.exists()) {
+        setAdminPassMsg({type: 'error', text: '관리자 비밀번호가 설정되지 않았습니다'})
+        setTimeout(() => setAdminPassMsg({type: '', text: ''}), 2000)
+        return
+      }
+
+      const correctPassword = docSnap.data().password
+
+      if (adminPassInput === correctPassword) {
+        setIsAdminMode(true)
+        setAdminPassMsg({type: 'success', text: '관리자 모드 활성화'})
+        setAdminPassInput('')
+        setTimeout(() => setAdminPassMsg({type: '', text: ''}), 1500)
+      } else {
+        setAdminPassMsg({type: 'error', text: '비밀번호가 틀렸습니다'})
+        setTimeout(() => setAdminPassMsg({type: '', text: ''}), 2000)
+        setAdminPassInput('')
+      }
+    } catch (error) {
+      console.error('관리자 검증 오류:', error)
+      setAdminPassMsg({type: 'error', text: '오류가 발생했습니다'})
+      setTimeout(() => setAdminPassMsg({type: '', text: ''}), 2000)
     }
   }
 
@@ -138,7 +190,129 @@ function DanceReflectionGrade3() {
 
   return (
     <div className="dance-reflection">
-      <h2>3학년 댄스 소감문</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>3학년 댄스 소감문</h2>
+        {!isAdminMode && (
+          <button
+            onClick={() => setIsAdminMode(true)}
+            style={{
+              padding: '8px 16px',
+              background: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '13px'
+            }}
+          >
+            🔐 관리자
+          </button>
+        )}
+      </div>
+
+      {isAdminMode && !selectedNumber && (
+        <div style={{
+          background: '#f8f9fa',
+          padding: '20px',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          border: '2px solid #6c757d'
+        }}>
+          <h3 style={{ marginTop: 0, color: '#1a2332' }}>관리자 모드</h3>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <input
+              type="password"
+              value={adminPassInput}
+              onChange={(e) => setAdminPassInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
+              placeholder="비밀번호 입력"
+              style={{
+                padding: '10px',
+                border: '2px solid #e8ecf1',
+                borderRadius: '6px',
+                fontSize: '14px',
+                flex: 1
+              }}
+            />
+            <button
+              onClick={handleAdminLogin}
+              style={{
+                padding: '10px 20px',
+                background: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '13px'
+              }}
+            >
+              로그인
+            </button>
+            <button
+              onClick={() => setIsAdminMode(false)}
+              style={{
+                padding: '10px 20px',
+                background: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '13px'
+              }}
+            >
+              닫기
+            </button>
+          </div>
+          {adminPassMsg.text && (
+            <div
+              style={{
+                marginTop: '10px',
+                padding: '10px',
+                borderRadius: '4px',
+                background: adminPassMsg.type === 'success' ? '#d4edda' : '#f8d7da',
+                color: adminPassMsg.type === 'success' ? '#155724' : '#721c24',
+                fontSize: '13px'
+              }}
+            >
+              {adminPassMsg.text}
+            </div>
+          )}
+        </div>
+      )}
+
+      {isAdminMode && selectedNumber && (
+        <div style={{
+          background: '#fff3cd',
+          padding: '12px 16px',
+          borderRadius: '6px',
+          marginBottom: '15px',
+          fontSize: '13px',
+          color: '#856404',
+          fontWeight: '600'
+        }}>
+          ✓ 관리자 모드 활성화 중
+        </div>
+      )}
+
+      {submitMsg.text && (
+        <div
+          style={{
+            padding: '12px 16px',
+            borderRadius: '8px',
+            marginBottom: '15px',
+            textAlign: 'center',
+            fontSize: '14px',
+            fontWeight: '600',
+            background: submitMsg.type === 'success' ? '#d4edda' : '#f8d7da',
+            color: submitMsg.type === 'success' ? '#155724' : '#721c24'
+          }}
+        >
+          {submitMsg.text}
+        </div>
+      )}
 
       <div className="selection-area">
         <div className="form-group">
