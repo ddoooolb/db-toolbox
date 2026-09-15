@@ -108,7 +108,6 @@ function DanceManagement() {
     if (!selectedClass) return
 
     setLoading(true)
-    let isFirstEval = true
 
     // Firestore에서 평가 기록 실시간 읽기
     const unsubEvals = onSnapshot(
@@ -122,14 +121,14 @@ function DanceManagement() {
         })
         setRecords(firebaseRecords)
         detectFlags(firebaseRecords)
-
-        // 처음 snapshot에서만 loading 종료
-        if (isFirstEval) {
-          setLoading(false)
-          isFirstEval = false
-        }
+        setLoading(false)
       }
     )
+
+    // 최대 5초 후 강제로 로딩 종료
+    const loadingTimeout = setTimeout(() => {
+      setLoading(false)
+    }, 5000)
 
     // Firestore에서 제출 상태 실시간 읽기
     const unsubSubmitted = onSnapshot(
@@ -199,6 +198,7 @@ function DanceManagement() {
     )
 
     return () => {
+      clearTimeout(loadingTimeout)
       unsubEvals()
       unsubSubmitted()
       unsubTeacherResults()
