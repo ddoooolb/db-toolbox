@@ -208,14 +208,14 @@ function TeacherCommentManagement() {
 
     students.forEach(student => {
       const studentData = records[student.id]
-      const hasRecords = studentData?.records && studentData.records.length > 0
+      const studentHasRecords = studentData?.records && studentData.records.length > 0
       const hasReflections = studentData?.reflections && Object.values(studentData.reflections).some(val => val?.trim())
 
-      if (hasRecords || hasReflections) {
-        hasRecords && (hasRecords = true)
+      if (studentHasRecords || hasReflections) {
+        studentHasRecords && (hasRecords = true)
         classRecords += `[${student.number}번 ${student.name}]\n`
 
-        if (hasRecords) {
+        if (studentHasRecords) {
           classRecords += '누가기록:\n'
           studentData.records.forEach(record => {
             classRecords += `- ${record.date}: ${record.content}\n`
@@ -275,12 +275,12 @@ function TeacherCommentManagement() {
           allRecords += `【${grade}학년 ${classNum}반】\n`
           classRecords.sort((a, b) => a.number - b.number)
           classRecords.forEach(student => {
-            const hasRecords = student.data.records && student.data.records.length > 0
+            const studentHasRecords = student.data.records && student.data.records.length > 0
             const hasReflections = student.data.reflections && Object.values(student.data.reflections).some(val => val?.trim())
 
             allRecords += `[${student.number}번 ${student.name}]\n`
 
-            if (hasRecords) {
+            if (studentHasRecords) {
               allRecords += '누가기록:\n'
               student.data.records.forEach(record => {
                 allRecords += `- ${record.date}: ${record.content}\n`
