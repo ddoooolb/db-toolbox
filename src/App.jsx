@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import PEToolsMain from './components/attendance/PEToolsMain'
 import AttendancePublic from './components/attendance/AttendancePublic'
 import DanceEvaluation from './components/dance/DanceEvaluation'
+import DanceReflectionGrade3 from './components/dance/DanceReflectionGrade3'
 import { initialStudents } from './data/students'
 import { initialGroupsData } from './data/groupsData'
 import { initializeAuth, db } from './firebase'
@@ -76,8 +77,14 @@ function App() {
   const searchParams = new URLSearchParams(window.location.search)
   const attendanceMode = searchParams.get('mode') === 'attendance'
   const danceMode = searchParams.get('mode') === 'dance'
+  const grade3DanceMode = searchParams.get('grade3') === 'dance'
 
   const [activeTab, setActiveTab] = useState('petools')
+
+  // 3학년 댄스 소감문 전용 모드
+  if (grade3DanceMode) {
+    return <DanceReflectionGrade3 />
+  }
 
   // 출석 전용 모드
   if (attendanceMode) {
