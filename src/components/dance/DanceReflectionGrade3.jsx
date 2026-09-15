@@ -60,15 +60,18 @@ function DanceReflectionGrade3() {
     if (foundName) {
       loadReflection(selectedGrade, selectedClass, selectedNumber)
 
-      // 제출 상태 실시간 감시
+      // 제출 상태 실시간 감시 (round1, round2 둘 다)
       const classId = `${selectedGrade}학년 ${selectedClass}반`
       const unsubscribe = onSnapshot(
         query(collection(db, 'dance-submitted'),
-          where('classId', '==', classId),
-          where('studentName', '==', foundName)
+          where('classId', '==', classId)
         ),
         snapshot => {
-          setIsSubmitted(snapshot.docs.length > 0)
+          const isSubmittedByStudent = snapshot.docs.some(doc => {
+            const data = doc.data()
+            return data.studentName === foundName
+          })
+          setIsSubmitted(isSubmittedByStudent)
         }
       )
 
