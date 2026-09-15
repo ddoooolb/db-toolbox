@@ -22,17 +22,25 @@ function AttendanceStatistics({ students, attendance }) {
   const calculateStatistics = (sport, start, end) => {
     if (!sport) return null
 
+    console.log('📊 통계 계산 시작:', { sport, start, end })
+    console.log('📊 attendance 데이터:', attendance)
+    console.log('📊 attendance 키들:', Object.keys(attendance))
+
     // 해당 종목의 학생들
     const sportStudents = students.filter(s => s.sports === sport || (
       sport === '배구(남)' && s.sports === '배구(남,여)' ||
       sport === '배구(여)' && s.sports === '배구(남,여)'
     ))
+    console.log('📊 해당 종목 학생:', sportStudents.length)
     if (sportStudents.length === 0) return null
 
     // 해당 종목의 모든 운영일 찾기
     const operatingDates = new Set()
     Object.keys(attendance).forEach(key => {
-      const [date, recordSport] = key.split('-').slice(0, 2)
+      const parts = key.split('-')
+      const date = parts.slice(0, 3).join('-')
+      const recordSport = parts[3]
+      console.log('📊 키 분석:', { key, date, recordSport, matches: recordSport === sport })
       if (recordSport === sport) {
         // 날짜 범위 필터링
         if (start && end) {
@@ -44,6 +52,7 @@ function AttendanceStatistics({ students, attendance }) {
         }
       }
     })
+    console.log('📊 운영일:', Array.from(operatingDates))
 
     const totalOperatingDays = operatingDates.size
     if (totalOperatingDays === 0) return null

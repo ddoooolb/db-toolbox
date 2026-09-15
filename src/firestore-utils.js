@@ -23,6 +23,7 @@ export const getAttendanceData = async (classId) => {
 
 export const setAttendanceData = async (classId, data) => {
   try {
+    console.log('💾 출석 저장 시작:', { classId, dataKeys: Object.keys(data), dataSize: Object.keys(data).length })
     await waitForAuth()
     const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
     const updateData = {}
@@ -33,6 +34,7 @@ export const setAttendanceData = async (classId, data) => {
         updateData[key] = deleteField()
       }
     })
+    console.log('💾 Firestore에 저장할 데이터:', updateData)
     await setDoc(classDoc, updateData, { merge: true })
     console.log('✓ 출석 데이터 저장 성공')
   } catch (error) {

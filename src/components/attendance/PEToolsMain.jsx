@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AttendanceMain from './AttendanceMain'
 import AdminLogin from '../admin/AdminLogin'
 import AdminPanel from '../admin/AdminPanel'
 import DanceEvaluation from '../dance/DanceEvaluation'
 import DanceReflection from '../dance/DanceReflection'
 import TeacherCommentManagement from '../teacher/TeacherCommentManagement'
+import { listenAttendanceData } from '../../firestore-utils'
 import './PEToolsMain.css'
 
 const PETOOLS_MENUS = [
@@ -18,6 +19,16 @@ function PEToolsMain({ students, setStudents }) {
   const [activeMenu, setActiveMenu] = useState('')
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
   const [attendance, setAttendance] = useState({})
+
+  useEffect(() => {
+    let unsubscribe = () => {}
+    listenAttendanceData('class1', (data) => {
+      setAttendance(data)
+    }).then(unsub => {
+      unsubscribe = unsub
+    })
+    return () => unsubscribe()
+  }, [])
 
   if (isAdminLoggedIn) {
     return (
