@@ -108,6 +108,8 @@ function DanceManagement() {
     if (!selectedClass) return
 
     setLoading(true)
+    let evals_loaded = false
+    let submitted_loaded = false
 
     // Firestore에서 평가 기록 실시간 읽기
     const unsubEvals = onSnapshot(
@@ -121,7 +123,8 @@ function DanceManagement() {
         })
         setRecords(firebaseRecords)
         detectFlags(firebaseRecords)
-        setLoading(false)
+        evals_loaded = true
+        if (evals_loaded && submitted_loaded) setLoading(false)
       }
     )
 
@@ -137,9 +140,13 @@ function DanceManagement() {
         })
         console.log(`[${selectedClass}] 제출 데이터:`, firebaseSubmitted)
         setSubmitted(firebaseSubmitted)
+        submitted_loaded = true
+        if (evals_loaded && submitted_loaded) setLoading(false)
       },
       error => {
         console.error('dance-submitted 로드 실패:', error.code)
+        submitted_loaded = true
+        if (evals_loaded && submitted_loaded) setLoading(false)
       }
     )
 
