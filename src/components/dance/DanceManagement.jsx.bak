@@ -260,6 +260,9 @@ function DanceManagement() {
     newState[type] = !newState[type]
     setOpenState(newState)
 
+    // localStorage에 저장
+    localStorage.setItem(keyFor('open', selectedClass), JSON.stringify(newState))
+    console.log('✓ localStorage 저장:', type, newState[type])
 
     // Firestore에도 저장
     try {
@@ -442,11 +445,17 @@ function DanceManagement() {
     })
 
     // 결과평가: 기존 데이터가 있으면 유지, 없으면 새로 생성
+    const existingResults = JSON.parse(localStorage.getItem(keyFor('teacher-result', testClassId)) || '{}')
     const testResults = {}
     Object.keys(classGroups.groups).forEach((groupName) => {
       testResults[groupName] = existingResults[groupName] || allScores[Math.floor(Math.random() * allScores.length)]
     })
 
+    // localStorage 저장
+    localStorage.setItem(keyFor('records', testClassId), JSON.stringify(testRecords))
+    localStorage.setItem(keyFor('submitted', testClassId), JSON.stringify(testSubmitted))
+    localStorage.setItem(keyFor('teacher-result', testClassId), JSON.stringify(testResults))
+    localStorage.setItem(keyFor('open', testClassId), JSON.stringify({ round1: true, round2: true }))
 
     // classes에도 추가 (반 선택 시 인식 가능하게)
     const newClasses = {...classes, [testClassId]: {...classGroups, label: testClassId}}
@@ -574,6 +583,7 @@ function DanceManagement() {
           onClick={() => {
             if (window.confirm(`${selectedClass}의 모든 평가 데이터를 삭제하시겠습니까?\n\n⚠️ 취소할 수 없습니다!`)) {
               ['records', 'submitted', 'teacher-result', 'open'].forEach(type =>
+                localStorage.removeItem(`dance-eval-${type}:${selectedClass}`)
               )
               setOpenState({})
               setRecords({})
@@ -720,6 +730,7 @@ function DanceManagement() {
                       }
                     })
                     setRecords(newRecords)
+                    localStorage.setItem(keyFor('records', selectedClass), JSON.stringify(newRecords))
                     loadData()
                   }}
                   style={{
@@ -1087,6 +1098,7 @@ function DanceManagement() {
                   newOverrides[resultModalStudent] = resultModalValue
                 }
                 setResultOverrides(newOverrides)
+                localStorage.setItem(keyFor('result-overrides', selectedClass), JSON.stringify(newOverrides))
                 // 데이터 새로고침 (총점 업데이트)
                 loadData()
                 setResultModalOpen(false)
