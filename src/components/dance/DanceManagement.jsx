@@ -98,9 +98,30 @@ function DanceManagement() {
   useEffect(() => {
     if (!selectedClass) return
 
-    setLoading(true)
+    // 1단계: localStorage에서 즉시 로드 후 UI 표시
+    try {
+      const localRecords = getEncryptedItem(keyFor('records', selectedClass)) || {}
+      const localSubmitted = getEncryptedItem(keyFor('submitted', selectedClass)) || {}
+      const openState = JSON.parse(localStorage.getItem(keyFor('open', selectedClass)) || '{}')
+      const teacherResults = getEncryptedItem(keyFor('teacher-result', selectedClass)) || {}
+      const overrides = getEncryptedItem(keyFor('overrides', selectedClass)) || {}
+      const resultOverrides = getEncryptedItem(keyFor('result-overrides', selectedClass)) || {}
 
-    // Firestore에서 평가 기록 실시간 읽기
+      setRecords(localRecords)
+      setSubmitted(localSubmitted)
+      setOpenState(openState)
+      setTeacherResults(teacherResults)
+      setOverrides(overrides)
+      setResultOverrides(resultOverrides)
+      detectFlags(localRecords)
+    } catch (e) {
+      console.error('localStorage 로드 실패:', e)
+    }
+
+    // 로딩 즉시 종료 (localStorage 기반 UI가 바로 표시됨)
+    setLoading(false)
+
+    // 2단계: Firestore 백그라운드 동기화 (로딩 UI와 무관)
     const unsubEvals = onSnapshot(
       query(collection(db, 'dance-evaluations'), where('classId', '==', selectedClass)),
       snapshot => {
@@ -111,18 +132,15 @@ function DanceManagement() {
           firebaseRecords[key] = data
         })
 
-        // localStorage와 합치기
         const localRecords = getEncryptedItem(keyFor('records', selectedClass)) || {}
         const mergedRecords = { ...localRecords, ...firebaseRecords }
 
         setRecords(mergedRecords)
         setEncryptedItem(keyFor('records', selectedClass), mergedRecords)
         detectFlags(mergedRecords)
-        setLoading(false)
       }
     )
 
-    // Firestore에서 제출 상태 실시간 읽기
     const unsubSubmitted = onSnapshot(
       query(collection(db, 'dance-submitted'), where('classId', '==', selectedClass)),
       snapshot => {
@@ -133,7 +151,6 @@ function DanceManagement() {
           firebaseSubmitted[key] = true
         })
 
-        // localStorage와 합치기
         const localSubmitted = getEncryptedItem(keyFor('submitted', selectedClass)) || {}
         const mergedSubmitted = { ...localSubmitted, ...firebaseSubmitted }
 
@@ -143,27 +160,8 @@ function DanceManagement() {
       },
       error => {
         console.error('dance-submitted 로드 실패:', error.code)
-        // Firestore 실패 시 localStorage만 사용
-        const localSubmitted = getEncryptedItem(keyFor('submitted', selectedClass)) || {}
-        console.log(`[${selectedClass}] 제출 데이터 (Firestore 오류)`, localSubmitted)
-        setSubmitted(localSubmitted)
       }
     )
-
-    // localStorage에서 다른 데이터 로드
-    try {
-      const openState = JSON.parse(localStorage.getItem(keyFor('open', selectedClass)) || '{}')
-      const teacherResults = getEncryptedItem(keyFor('teacher-result', selectedClass)) || {}
-      const overrides = getEncryptedItem(keyFor('overrides', selectedClass)) || {}
-      const resultOverrides = getEncryptedItem(keyFor('result-overrides', selectedClass)) || {}
-
-      setOpenState(openState)
-      setTeacherResults(teacherResults)
-      setOverrides(overrides)
-      setResultOverrides(resultOverrides)
-    } catch (e) {
-      console.error('데이터 로드 실패:', e)
-    }
 
     return () => {
       unsubEvals()
