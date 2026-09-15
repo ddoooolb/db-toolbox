@@ -108,6 +108,7 @@ function DanceManagement() {
     if (!selectedClass) return
 
     setLoading(true)
+    let isFirstEval = true
 
     // Firestore에서 평가 기록 실시간 읽기
     const unsubEvals = onSnapshot(
@@ -121,7 +122,12 @@ function DanceManagement() {
         })
         setRecords(firebaseRecords)
         detectFlags(firebaseRecords)
-        setLoading(false)
+
+        // 처음 snapshot에서만 loading 종료
+        if (isFirstEval) {
+          setLoading(false)
+          isFirstEval = false
+        }
       }
     )
 
