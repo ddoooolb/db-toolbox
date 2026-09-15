@@ -308,50 +308,6 @@ function DanceManagement() {
   }
 
   // 제출 다시 허용
-  const resetSubmitted = async (key) => {
-    if (!window.confirm('이 제출을 취소하시겠습니까?\n\n관련된 평가 데이터도 모두 삭제됩니다.')) {
-      return
-    }
-
-    const [evalType, name] = key.split('|')
-
-    try {
-      // submitted 삭제
-      const newSubmitted = {...submitted}
-      delete newSubmitted[key]
-      setEncryptedItem(keyFor('submitted', selectedClass), newSubmitted)
-
-      // Firestore에서도 제출 상태 삭제
-      const submittedDocRef = doc(db, 'dance-submitted', `${selectedClass}|${evalType}|${name}`)
-      await deleteDoc(submittedDocRef)
-
-      // 해당 학생의 평가 기록 삭제
-      const newRecords = {...records}
-      const keysToDelete = Object.keys(newRecords).filter(k => {
-        const record = newRecords[k]
-        return record.evalType === evalType && record.raterName === name
-      })
-
-      // Firestore에서 평가 기록 삭제
-      const deletePromises = keysToDelete.map(k => {
-        const docId = `${selectedClass}|${k}`
-        return deleteDoc(doc(db, 'dance-evaluations', docId))
-      })
-
-      keysToDelete.forEach(k => delete newRecords[k])
-      setEncryptedItem(keyFor('records', selectedClass), newRecords)
-
-      await Promise.all(deletePromises)
-
-      // 신뢰도 점검 재계산
-      detectFlags(newRecords)
-      alert('제출이 취소되었습니다.')
-    } catch (e) {
-      console.error('취소 오류:', e)
-      alert('취소 중 오류가 발생했습니다.')
-    }
-  }
-
   // Flag 토글
   const toggleFlag = (flagIndex) => {
     const flagData = flags[flagIndex]
