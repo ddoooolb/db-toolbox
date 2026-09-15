@@ -86,8 +86,8 @@ function DanceManagement() {
       })
     })
     setClasses(builtClasses)
-    const firstClass = Object.keys(builtClasses)[0]
-    if (firstClass && !selectedClass) setSelectedClass(firstClass)
+    const firstClass = Object.keys(builtClasses)[0] || Object.keys(initialGroupsData)[0]
+    if (!selectedClass) setSelectedClass(firstClass)
   }, [])
 
   const classData = classes[selectedClass]
