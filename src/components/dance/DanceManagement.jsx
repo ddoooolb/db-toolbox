@@ -622,62 +622,67 @@ function DanceManagement() {
 
       {/* 제출 현황 */}
       <div className="dance-card">
-        <div className="dance-step-label">제출 현황 (조별 평가자)</div>
+        <div className="dance-step-label">제출 현황</div>
         {Object.keys(groups).sort((a, b) => {
           const numA = parseInt(a.match(/(\d+)조/)?.[1] || '0')
           const numB = parseInt(b.match(/(\d+)조/)?.[1] || '0')
           return numA - numB
-        }).map(group => {
-          const leader = leaders[group]
-          return (
-            <div key={group}>
-              <div style={{ background: '#f5f5f5', fontWeight: '600', padding: '10px 12px', borderTop: '2px solid var(--navy)', fontSize: '13px' }}>
-                {group} {leader && `(${leader})`}
-              </div>
-              {leader && ['round1', 'round2'].map(evalType => {
-                const key = `${evalType}|${leader}`
-                const isSubmitted = submitted[key]
-                return (
-                  <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid var(--line)', alignItems: 'center', fontSize: '12px' }}>
-                    <span>{leader} — {evalType === 'round1' ? '1차' : '2차'}</span>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span style={{
-                        padding: '4px 10px',
-                        borderRadius: '12px',
-                        fontSize: '11px',
-                        fontWeight: '600',
-                        background: isSubmitted ? '#e8f5e9' : '#ffebee',
-                        color: isSubmitted ? '#2f9e6e' : '#c0392b'
-                      }}>
-                        {isSubmitted ? '✓ 제출' : '✕ 미제출'}
-                      </span>
-                      {isSubmitted && (
-                        <button
-                          onClick={() => resetSubmitted(key)}
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            background: '#ffcccb',
-                            color: '#c0392b',
-                            cursor: 'pointer',
-                            fontWeight: '600',
-                            fontSize: '11px',
-                            transition: 'all 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.target.style.background = '#ff9999'}
-                          onMouseLeave={(e) => e.target.style.background = '#ffcccb'}
-                        >
-                          🗑️ 초기화
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
+        }).map(group => (
+          <div key={group}>
+            <div style={{ background: '#f5f5f5', fontWeight: '600', padding: '10px 12px', borderTop: '2px solid var(--navy)', fontSize: '13px' }}>
+              {group}
             </div>
-          )
-        })}
+            {groups[group]
+              .sort((a, b) => {
+                const aNum = parseInt(a.match(/\d+/) ? a.match(/\d+/)[0] : '9999')
+                const bNum = parseInt(b.match(/\d+/) ? b.match(/\d+/)[0] : '9999')
+                return aNum - bNum
+              })
+              .map(name => (
+                ['round1', 'round2'].map(evalType => {
+                  const key = `${evalType}|${name}`
+                  const isSubmitted = submitted[key]
+                  return (
+                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid var(--line)', alignItems: 'center', fontSize: '12px' }}>
+                      <span>{name} — {evalType === 'round1' ? '1차' : '2차'}</span>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          background: isSubmitted ? '#e8f5e9' : '#ffebee',
+                          color: isSubmitted ? '#2f9e6e' : '#c0392b'
+                        }}>
+                          {isSubmitted ? '✓ 제출' : '✕ 미제출'}
+                        </span>
+                        {isSubmitted && (
+                          <button
+                            onClick={() => resetSubmitted(key)}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              border: 'none',
+                              background: '#ffcccb',
+                              color: '#c0392b',
+                              cursor: 'pointer',
+                              fontWeight: '600',
+                              fontSize: '11px',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.background = '#ff9999'}
+                            onMouseLeave={(e) => e.target.style.background = '#ffcccb'}
+                          >
+                            🗑️ 초기화
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })
+              ))}
+          </div>
+        ))}
       </div>
 
       {/* 신뢰도 점검 */}
