@@ -138,7 +138,7 @@ function DanceReflectionGrade3() {
 
   return (
     <div className="dance-reflection">
-      <h2>3학년 댄스 수업 소감</h2>
+      <h2>3학년 댄스 소감문</h2>
 
       <div className="selection-area">
         <div className="form-group">
