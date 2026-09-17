@@ -22,7 +22,12 @@ function AttendancePublic({ students: propsStudents }) {
           firestoreStudents.push(doc.data())
         })
 
-        setStudents(firestoreStudents.length > 0 ? firestoreStudents : initialStudents)
+        const allStudents = [...initialStudents, ...firestoreStudents]
+        const uniqueStudents = Array.from(
+          new Map(allStudents.map(s => [s.id, s])).values()
+        )
+
+        setStudents(uniqueStudents)
       },
       error => {
         console.error('Firestore 오류:', error)
