@@ -34,6 +34,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
   const [bulkInputMinutes, setBulkInputMinutes] = useState('120')
   const [minutesModalOpen, setMinutesModalOpen] = useState(false)
   const [minutesStudentId, setMinutesStudentId] = useState(null)
+  const [minutesStudentSports, setMinutesStudentSports] = useState(null)
   const [minutesInput, setMinutesInput] = useState('60')
   const isInitialLoad = useRef(true)
 
@@ -59,15 +60,16 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
     return selectedDate
   }
 
-  const handleMarkAttendance = (studentId) => {
+  const handleMarkAttendance = (student) => {
     const dateKey = getDateKey()
-    const recordKey = `${dateKey}-${activeSport}-${studentId}`
+    const recordKey = `${dateKey}-${student.sports}-${student.id}`
     const currentMinutes = attendance[recordKey]
 
     // 아침/점심/방과후: 45분 토글
     // 직접입력: 모달 열기
     if (activeTimeSlot === 'direct-input') {
-      setMinutesStudentId(studentId)
+      setMinutesStudentId(student.id)
+      setMinutesStudentSports(student.sports)
       setMinutesInput(currentMinutes ? String(currentMinutes) : '60')
       setMinutesModalOpen(true)
     } else {
@@ -170,7 +172,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
             <div className="student-grid">
               {filteredStudents.map(student => {
                 const dateKey = getDateKey()
-                const recordKey = `${dateKey}-${activeSport}-${student.id}`
+                const recordKey = `${dateKey}-${student.sports}-${student.id}`
                 const minutes = attendance[recordKey]
                 const isMarked = minutes && parseFloat(minutes) > 0
                 const hours = minutes ? Math.floor(parseFloat(minutes) / 60) : 0
@@ -179,7 +181,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                   <button
                     key={student.id}
                     className={`student-button ${isMarked ? 'marked' : ''}`}
-                    onClick={() => handleMarkAttendance(student.id)}
+                    onClick={() => handleMarkAttendance(student)}
                   >
                     <div className="student-info">
                       {student.grade}학년 {student.class}반 {student.number}번
@@ -362,7 +364,8 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                   return
                 }
                 bulkSelectedStudents.forEach(studentId => {
-                  const recordKey = `${bulkInputDate}-${bulkInputSport}-${studentId}`
+                  const student = students.find(s => s.id === studentId)
+                  const recordKey = `${bulkInputDate}-${student.sports}-${studentId}`
                   setAttendance(prev => ({
                     ...prev,
                     [recordKey]: parseFloat(bulkInputMinutes)
@@ -476,13 +479,14 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                     return
                   }
                   const dateKey = getDateKey()
-                  const recordKey = `${dateKey}-${activeSport}-${minutesStudentId}`
+                  const recordKey = `${dateKey}-${minutesStudentSports}-${minutesStudentId}`
                   setAttendance(prev => ({
                     ...prev,
                     [recordKey]: parseFloat(minutesInput)
                   }))
                   setMinutesModalOpen(false)
                   setMinutesStudentId(null)
+                  setMinutesStudentSports(null)
                   setMinutesInput('60')
                 }}
                 style={{
@@ -503,6 +507,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                 onClick={() => {
                   setMinutesModalOpen(false)
                   setMinutesStudentId(null)
+                  setMinutesStudentSports(null)
                   setMinutesInput('60')
                 }}
                 style={{
@@ -524,7 +529,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
             <button
               onClick={() => {
                 const dateKey = getDateKey()
-                const recordKey = `${dateKey}-${activeSport}-${minutesStudentId}`
+                const recordKey = `${dateKey}-${minutesStudentSports}-${minutesStudentId}`
                 setAttendance(prev => {
                   const newAttendance = {...prev}
                   delete newAttendance[recordKey]
@@ -532,6 +537,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                 })
                 setMinutesModalOpen(false)
                 setMinutesStudentId(null)
+                setMinutesStudentSports(null)
                 setMinutesInput('60')
               }}
               style={{
