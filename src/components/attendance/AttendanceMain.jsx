@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { listenAttendanceData, setAttendanceData } from '../../firestore-utils'
 import './AttendanceMain.css'
 
@@ -35,6 +35,19 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
   const [minutesModalOpen, setMinutesModalOpen] = useState(false)
   const [minutesStudentId, setMinutesStudentId] = useState(null)
   const [minutesInput, setMinutesInput] = useState('60')
+  const isInitialLoad = useRef(true)
+
+  useEffect(() => {
+    isInitialLoad.current = true
+    let unsubscribe = () => {}
+    listenAttendanceData(classId, (data) => {
+      setAttendance(data)
+      isInitialLoad.current = false
+    }).then(unsub => {
+      unsubscribe = unsub
+    })
+    return () => unsubscribe()
+  }, [classId])
 
   useEffect(() => {
     if (Object.keys(attendance).length >= 0) {
