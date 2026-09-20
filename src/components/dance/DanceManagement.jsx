@@ -28,7 +28,11 @@ const buildStudentNumbers = () => {
       group.members?.forEach(member => {
         if (member.name) numbers[member.name] = member.number || "00"
       })
-      if (group.leader) numbers[group.leader] = "00"
+      // 조장도 members에서 찾아서 번호 사용
+      if (group.leader) {
+        const leaderMember = group.members?.find(m => m.name === group.leader)
+        numbers[group.leader] = leaderMember?.number || "00"
+      }
     })
   })
   return numbers
