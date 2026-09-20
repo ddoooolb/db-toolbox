@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import './SportsFestival.css'
+import RopeJumpAnimation from './animations/RopeJumpAnimation'
+import TyphoonEyeAnimation from './animations/TyphoonEyeAnimation'
+import BallBounceAnimation from './animations/BallBounceAnimation'
+import ThreeLegsAnimation from './animations/ThreeLegsAnimation'
+import RelayAnimation from './animations/RelayAnimation'
 
 const SPORTS = [
   {
@@ -9,13 +14,7 @@ const SPORTS = [
     type: '기록형',
     icon: '🪢',
     time: '10:00 - 10:30',
-    description: '큰 줄을 반이 함께 넘기며 기록을 겨루는 종목',
-    rules: [
-      '반 전체가 참여하는 대규모 줄넘기',
-      '8자 모양으로 움직이면서 줄을 넘음',
-      '정해진 시간 동안 몇 명이 연속으로 넘을 수 있는지 기록',
-      '떨어지면 다시 시작'
-    ]
+    animation: RopeJumpAnimation
   },
   {
     id: 2,
@@ -23,13 +22,7 @@ const SPORTS = [
     type: '경쟁형',
     icon: '🌪️',
     time: '10:30 - 11:20',
-    description: '큰 원 안에서 팀 전체의 협력이 중요한 종목',
-    rules: [
-      '반 전체가 큰 원을 만들어 태풍처럼 빙글빙글 돌기',
-      '타이밍과 팀워크가 중요',
-      '흐트러지지 않고 균형있게 움직여야 함',
-      '연습된 티가 나고 정렬이 잘된 팀이 좋은 점수'
-    ]
+    animation: TyphoonEyeAnimation
   },
   {
     id: 3,
@@ -37,13 +30,7 @@ const SPORTS = [
     type: '기록형',
     icon: '🏐',
     time: '11:50 - 12:20',
-    description: '여럿이 함께 공을 튀기며 몇 번까지 이어가는지 겨루는 종목',
-    rules: [
-      '정해진 수의 학생들이 함께 공을 튀김',
-      '정해진 시간 또는 정해진 횟수까지 공을 떨어뜨리지 않고 튀김',
-      '모든 학생이 공을 한 번씩 튀려야 함',
-      '협동과 타이밍이 가장 중요'
-    ]
+    animation: BallBounceAnimation
   },
   {
     id: 4,
@@ -51,13 +38,7 @@ const SPORTS = [
     type: '기록형',
     icon: '🏃‍♂️',
     time: '13:50 - 14:20',
-    description: '두 명이 한 팀을 이루어 다리를 묶고 함께 뛰는 종목',
-    rules: [
-      '2명씩 짝을 지어 한쪽 다리를 묶음',
-      '정해진 거리를 미션을 수행하며 달림',
-      '떨어지지 않고 함께 움직이기',
-      '먼저 결승선에 도착하면 승리'
-    ]
+    animation: ThreeLegsAnimation
   },
   {
     id: 5,
@@ -65,13 +46,7 @@ const SPORTS = [
     type: '경쟁형',
     icon: '🏃',
     time: '11:20 - 11:50 / 14:20 - 15:00',
-    description: '배턴을 주고받으며 빠르게 달리는 종목',
-    rules: [
-      '반의 모든 학생이 참여하는 릴레이',
-      '정해진 거리를 돌아서 다음 주자에게 배턴 전달',
-      '배턴을 떨어뜨리지 않기',
-      '팀 전체가 가장 빠른 속도로 달릴 때 우승'
-    ]
+    animation: RelayAnimation
   }
 ]
 
@@ -162,22 +137,15 @@ export default function SportsFestival() {
                 <h3>{sport.name}</h3>
                 <p className="sport-type">{sport.type}</p>
                 <p className="sport-time">⏰ {sport.time}</p>
+
                 {selectedSport === sport.id && (
                   <motion.div
-                    className="sport-details"
+                    className="sport-animation"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     transition={{ duration: 0.3 }}
                   >
-                    <p className="sport-description">{sport.description}</p>
-                    <div className="sport-rules">
-                      <h4>📋 경기 규칙:</h4>
-                      <ul>
-                        {sport.rules.map((rule, rIdx) => (
-                          <li key={rIdx}>{rule}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    <sport.animation />
                   </motion.div>
                 )}
               </motion.div>

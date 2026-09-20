@@ -125,49 +125,18 @@
   font-weight: 600;
 }
 
-.sport-details {
-  margin-top: 15px;
+.sport-animation {
+  margin-top: 20px;
   padding-top: 15px;
   border-top: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.sport-description {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 15px;
-  font-weight: 500;
-}
-
-.sport-rules {
-  text-align: left;
-}
-
-.sport-rules h4 {
-  font-size: 0.9rem;
-  margin-bottom: 10px;
-  font-weight: 700;
-}
-
-.sport-rules ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sport-rules li {
-  font-size: 0.85rem;
-  line-height: 1.5;
-  margin-bottom: 8px;
-  padding-left: 15px;
-  position: relative;
-}
-
-.sport-rules li:before {
-  content: '✓';
-  position: absolute;
-  left: 0;
-  font-weight: bold;
-  color: #f5576c;
+.animation-container {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 10px;
 }
 
 .festival-sports .btn-next {
