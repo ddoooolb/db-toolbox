@@ -188,9 +188,15 @@ function DanceManagement() {
       snapshot => {
         const resultOverrides = {}
         snapshot.forEach(doc => {
-          resultOverrides[doc.id] = doc.data()
+          const data = doc.data()
+          resultOverrides[data.studentName] = data.override
         })
         setResultOverrides(resultOverrides)
+      },
+      error => {
+        console.error('❌ dance-result-overrides 로드 실패:', error.message)
+        const localOverrides = getEncryptedItem(keyFor('result-overrides', selectedClass)) || {}
+        setResultOverrides(localOverrides)
       }
     )
 
@@ -1147,7 +1153,7 @@ function DanceManagement() {
 
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
-              onClick={() => {
+              onClick={async () => {
                 const newOverrides = {...resultOverrides}
                 if (resultModalValue === 0) {
                   delete newOverrides[resultModalStudent]
@@ -1155,6 +1161,23 @@ function DanceManagement() {
                   newOverrides[resultModalStudent] = resultModalValue
                 }
                 setResultOverrides(newOverrides)
+
+                // Firestore에 저장
+                try {
+                  if (resultModalValue === 0) {
+                    await deleteDoc(doc(db, 'dance-result-overrides', `${selectedClass}|${resultModalStudent}`))
+                  } else {
+                    await setDoc(doc(db, 'dance-result-overrides', `${selectedClass}|${resultModalStudent}`), {
+                      classId: selectedClass,
+                      studentName: resultModalStudent,
+                      override: resultModalValue,
+                      ts: Date.now()
+                    })
+                  }
+                } catch (e) {
+                  console.error('❌ 오버라이드 저장 실패:', e.message)
+                }
+
                 // 데이터 새로고침 (총점 업데이트)
                 loadData()
                 setResultModalOpen(false)
