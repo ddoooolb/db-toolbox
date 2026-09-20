@@ -3,6 +3,7 @@ import StudentGroupManagement from '../admin/StudentGroupManagement'
 import { initialGroupsData } from '../../data/groupsData'
 import { db } from '../../firebase'
 import { collection, onSnapshot, doc, deleteDoc, setDoc, query, where, getDocs } from 'firebase/firestore'
+import { getEncryptedItem } from '../../utils/encryption'
 import './dance-styles.css'
 
 const keyFor = (name, classId) => `dance-eval-${name}:${classId}`
@@ -122,6 +123,14 @@ function DanceManagement() {
         setRecords(firebaseRecords)
         detectFlags(firebaseRecords)
         setLoading(false)
+      },
+      error => {
+        console.error('❌ dance-evaluations 로드 실패:', error.message)
+        // Firestore 실패 시 localStorage에서 로드
+        const localRecords = getEncryptedItem(keyFor('records', selectedClass)) || {}
+        setRecords(localRecords)
+        detectFlags(localRecords)
+        setLoading(false)
       }
     )
 
@@ -154,7 +163,8 @@ function DanceManagement() {
       snapshot => {
         const results = {}
         snapshot.forEach(doc => {
-          results[doc.id] = doc.data()
+          const data = doc.data()
+          results[data.group] = data.score
         })
         setTeacherResults(results)
       }
@@ -340,20 +350,37 @@ function DanceManagement() {
       }
     })
     setRecords(newRecords)
-    setEncryptedItem(keyFor('records', selectedClass), newRecords)
     loadData()
   }
 
   // 결과평가 설정 (같은 버튼 다시 누르면 해제)
-  const setResultScore = (group, score) => {
+  const setResultScore = async (group, score) => {
     const newResults = {...teacherResults}
     if (newResults[group] === score) {
       delete newResults[group]
     } else {
       newResults[group] = score
     }
+    console.log('🔵 setResultScore:', group, score, JSON.stringify(newResults))
     setTeacherResults(newResults)
-    setEncryptedItem(keyFor('teacher-result', selectedClass), newResults)
+
+    // Firestore에 저장
+    try {
+      const docRef = doc(db, 'dance-teacher-results', `${selectedClass}|${group}`)
+      if (newResults[group] === undefined) {
+        await deleteDoc(docRef)
+      } else {
+        await setDoc(docRef, {
+          classId: selectedClass,
+          group,
+          score: newResults[group],
+          ts: Date.now()
+        })
+      }
+      console.log(`✓ Firestore 결과평가 저장: ${group} ${newResults[group] || '삭제'}점`)
+    } catch (e) {
+      console.error('❌ Firestore 저장 실패:', e.message)
+    }
   }
 
   // 오버라이드 입력
@@ -365,7 +392,6 @@ function DanceManagement() {
       newOverrides[name] = Number(value)
     }
     setOverrides(newOverrides)
-    setEncryptedItem(keyFor('overrides', selectedClass), newOverrides)
   }
 
   // 테스트 데이터 생성
