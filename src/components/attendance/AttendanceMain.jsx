@@ -26,9 +26,20 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
   const [activeTimeSlot, setActiveTimeSlot] = useState('morning')
   const [activeSport, setActiveSport] = useState('')
   const [selectedDate, setSelectedDate] = useState(() => {
-    return new Date().toISOString().split('T')[0]
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const date = String(now.getDate()).padStart(2, '0')
+    return `${year}-${month}-${date}`
   })
-  const [bulkInputDate, setBulkInputDate] = useState(new Date().toISOString().split('T')[0])
+  const getBulkInputDate = () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const date = String(now.getDate()).padStart(2, '0')
+    return `${year}-${month}-${date}`
+  }
+  const [bulkInputDate, setBulkInputDate] = useState(getBulkInputDate())
   const [bulkInputSport, setBulkInputSport] = useState('')
   const [bulkSelectedStudents, setBulkSelectedStudents] = useState([])
   const [bulkInputMinutes, setBulkInputMinutes] = useState('120')
