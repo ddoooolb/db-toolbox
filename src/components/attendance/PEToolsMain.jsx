@@ -5,13 +5,11 @@ import AdminPanel from '../admin/AdminPanel'
 import DanceEvaluation from '../dance/DanceEvaluation'
 import DanceReflection from '../dance/DanceReflection'
 import TeacherCommentManagement from '../teacher/TeacherCommentManagement'
-import SportsFestival from '../sports-festival/SportsFestival'
 import { listenAttendanceData } from '../../firestore-utils'
 import './PEToolsMain.css'
 
 const PETOOLS_MENUS = [
   { id: 'attendance', name: '학교스포츠클럽 출석' },
-  { id: 'sports-festival', name: '🎉 체육한마당' },
   { id: 'dance', name: '댄스 평가' },
   { id: 'reflection', name: '댄스 소감문' },
   { id: 'comment', name: '교과세특' }
@@ -89,10 +87,6 @@ function PEToolsMain({ students, setStudents }) {
               classId="class1"
             />
           </div>
-        )}
-
-        {activeMenu === 'sports-festival' && (
-          <SportsFestival />
         )}
 
         {activeMenu === 'dance' && (
