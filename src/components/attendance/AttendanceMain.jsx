@@ -82,23 +82,22 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
       return
     }
 
-    // 아침/점심/방과후: 45분 토글 - 즉시 저장
+    // 아침/점심/방과후: 45분 토글 - Firestore 먼저 저장
     const newMinutes = isMarked ? 0 : 45
-    const newAttendance = {
-      ...attendance,
-      [recordKey]: newMinutes
-    }
 
-    setAttendance(newAttendance)
-
-    // Firestore에 직접 저장
     try {
       const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
       const updateData = {
         [recordKey]: newMinutes > 0 ? newMinutes : deleteField()
       }
       await setDoc(classDoc, updateData, { merge: true })
-      console.log('✓ 저장됨:', recordKey, newMinutes)
+
+      // Firestore 저장 후 state 업데이트
+      const newAttendance = {
+        ...attendance,
+        [recordKey]: newMinutes
+      }
+      setAttendance(newAttendance)
     } catch (error) {
       console.error('저장 실패:', error)
       alert('저장 실패: ' + error.message)
@@ -391,20 +390,25 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                 try {
                   const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
                   const updateData = {}
+                  const keysToUpdate = []
 
                   bulkSelectedStudents.forEach(studentId => {
                     const student = students.find(s => s.id === studentId)
                     const recordKey = `${bulkInputDate}-direct-input-${student.sports}-${studentId}`
                     updateData[recordKey] = parseFloat(bulkInputMinutes)
+                    keysToUpdate.push(recordKey)
+                  })
 
+                  // Firestore에 저장
+                  await setDoc(classDoc, updateData, { merge: true })
+
+                  // 저장 후 state 업데이트
+                  keysToUpdate.forEach(recordKey => {
                     setAttendance(prev => ({
                       ...prev,
                       [recordKey]: parseFloat(bulkInputMinutes)
                     }))
                   })
-
-                  // Firestore에 저장
-                  await setDoc(classDoc, updateData, { merge: true })
 
                   const hours = Math.floor(parseFloat(bulkInputMinutes) / 60)
                   const mins = parseFloat(bulkInputMinutes) % 60
