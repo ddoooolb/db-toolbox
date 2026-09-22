@@ -191,11 +191,13 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                 const isMarked = minutes && parseFloat(minutes) > 0
                 const hours = minutes ? Math.floor(parseFloat(minutes) / 60) : 0
                 const mins = minutes ? parseFloat(minutes) % 60 : 0
-                if (idx === 0) {
-                  console.log('🔍 첫 번째 학생 렌더링 테스트:', {
-                    student: student.name,
+
+                // 첫 번째와 마지막 학생 로그
+                if (idx === 0 || idx === filteredStudents.length - 1) {
+                  console.log(`🔍 학생 [${idx}] ${student.name}:`, {
+                    sports: student.sports,
+                    id: student.id,
                     recordKey,
-                    attendanceKeys: Object.keys(attendance).slice(0, 5),
                     minutes,
                     isMarked
                   })

@@ -23,6 +23,11 @@ function PEToolsMain({ students, setStudents }) {
   useEffect(() => {
     let unsubscribe = () => {}
     listenAttendanceData('class1', (data) => {
+      console.log('📡 Firestore 데이터 받음:', {
+        recordCount: Object.keys(data).length,
+        morningCount: Object.keys(data).filter(k => k.includes('-morning-')).length,
+        sampleKeys: Object.keys(data).slice(0, 5)
+      })
       setAttendance(data)
     }).then(unsub => {
       unsubscribe = unsub
