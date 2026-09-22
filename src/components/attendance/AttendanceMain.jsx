@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { listenAttendanceData, setAttendanceData } from '../../firestore-utils'
+import { doc, setDoc, deleteField } from 'firebase/firestore'
+import { db } from '../../firebase'
 import './AttendanceMain.css'
 
 const TIME_SLOTS = [
@@ -61,43 +63,45 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
     return () => unsubscribe()
   }, [classId])
 
-  useEffect(() => {
-    if (Object.keys(attendance).length >= 0) {
-      setAttendanceData(classId, attendance)
-    }
-  }, [attendance, classId])
 
   const getDateKey = () => {
     return selectedDate
   }
 
-  const handleMarkAttendance = (student) => {
+  const handleMarkAttendance = async (student) => {
     const dateKey = getDateKey()
-    const recordKey = `${dateKey}-${student.sports}-${student.id}`
+    const recordKey = `${dateKey}-${activeTimeSlot}-${student.sports}-${student.id}`
     const currentMinutes = attendance[recordKey]
+    const isMarked = currentMinutes && parseFloat(currentMinutes) > 0
 
-    // 아침/점심/방과후: 45분 토글
-    // 직접입력: 모달 열기
     if (activeTimeSlot === 'direct-input') {
       setMinutesStudentId(student.id)
       setMinutesStudentSports(student.sports)
       setMinutesInput(currentMinutes ? String(currentMinutes) : '60')
       setMinutesModalOpen(true)
-    } else {
-      // 아침/점심/방과후: 45분 토글
-      if (currentMinutes && parseFloat(currentMinutes) > 0) {
-        // 이미 체크됨 → 0으로 설정
-        setAttendance(prev => ({
-          ...prev,
-          [recordKey]: 0
-        }))
-      } else {
-        // 미체크 → 45분 추가
-        setAttendance(prev => ({
-          ...prev,
-          [recordKey]: 45
-        }))
+      return
+    }
+
+    // 아침/점심/방과후: 45분 토글 - 즉시 저장
+    const newMinutes = isMarked ? 0 : 45
+    const newAttendance = {
+      ...attendance,
+      [recordKey]: newMinutes
+    }
+
+    setAttendance(newAttendance)
+
+    // Firestore에 직접 저장
+    try {
+      const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
+      const updateData = {
+        [recordKey]: newMinutes > 0 ? newMinutes : deleteField()
       }
+      await setDoc(classDoc, updateData, { merge: true })
+      console.log('✓ 저장됨:', recordKey, newMinutes)
+    } catch (error) {
+      console.error('저장 실패:', error)
+      alert('저장 실패: ' + error.message)
     }
   }
 
@@ -181,13 +185,22 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
             <p className="no-students">등록된 학생이 없습니다</p>
           ) : (
             <div className="student-grid">
-              {filteredStudents.map(student => {
+              {filteredStudents.map((student, idx) => {
                 const dateKey = getDateKey()
-                const recordKey = `${dateKey}-${student.sports}-${student.id}`
+                const recordKey = `${dateKey}-${activeTimeSlot}-${student.sports}-${student.id}`
                 const minutes = attendance[recordKey]
                 const isMarked = minutes && parseFloat(minutes) > 0
                 const hours = minutes ? Math.floor(parseFloat(minutes) / 60) : 0
                 const mins = minutes ? parseFloat(minutes) % 60 : 0
+                if (idx === 0) {
+                  console.log('🔍 첫 번째 학생 렌더링 테스트:', {
+                    student: student.name,
+                    recordKey,
+                    attendanceKeys: Object.keys(attendance).slice(0, 5),
+                    minutes,
+                    isMarked
+                  })
+                }
                 return (
                   <button
                     key={student.id}
@@ -365,7 +378,7 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
 
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (bulkSelectedStudents.length === 0) {
                   alert('선택된 학생이 없습니다.')
                   return
@@ -374,22 +387,37 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                   alert('운동 시간을 입력해주세요.')
                   return
                 }
-                bulkSelectedStudents.forEach(studentId => {
-                  const student = students.find(s => s.id === studentId)
-                  const recordKey = `${bulkInputDate}-${student.sports}-${studentId}`
-                  setAttendance(prev => ({
-                    ...prev,
-                    [recordKey]: parseFloat(bulkInputMinutes)
-                  }))
-                })
-                const hours = Math.floor(parseFloat(bulkInputMinutes) / 60)
-                const mins = parseFloat(bulkInputMinutes) % 60
-                const timeStr = hours > 0 ? `${hours}시간 ${mins}분` : `${bulkInputMinutes}분`
-                alert(`${bulkSelectedStudents.length}명의 학생 출석이 입력되었습니다.\n운동 시간: ${timeStr}`)
-                setActiveTimeSlot('')
-                setBulkInputSport('')
-                setBulkSelectedStudents([])
-                setBulkInputMinutes('120')
+
+                try {
+                  const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
+                  const updateData = {}
+
+                  bulkSelectedStudents.forEach(studentId => {
+                    const student = students.find(s => s.id === studentId)
+                    const recordKey = `${bulkInputDate}-direct-input-${student.sports}-${studentId}`
+                    updateData[recordKey] = parseFloat(bulkInputMinutes)
+
+                    setAttendance(prev => ({
+                      ...prev,
+                      [recordKey]: parseFloat(bulkInputMinutes)
+                    }))
+                  })
+
+                  // Firestore에 저장
+                  await setDoc(classDoc, updateData, { merge: true })
+
+                  const hours = Math.floor(parseFloat(bulkInputMinutes) / 60)
+                  const mins = parseFloat(bulkInputMinutes) % 60
+                  const timeStr = hours > 0 ? `${hours}시간 ${mins}분` : `${bulkInputMinutes}분`
+                  alert(`${bulkSelectedStudents.length}명의 학생 출석이 입력되었습니다.\n운동 시간: ${timeStr}`)
+                  setActiveTimeSlot('')
+                  setBulkInputSport('')
+                  setBulkSelectedStudents([])
+                  setBulkInputMinutes('120')
+                } catch (error) {
+                  console.error('저장 실패:', error)
+                  alert('저장 실패: ' + error.message)
+                }
               }}
               style={{
                 flex: 1,
@@ -484,21 +512,32 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
 
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (!minutesInput || parseFloat(minutesInput) < 0) {
                     alert('올바른 시간을 입력해주세요.')
                     return
                   }
                   const dateKey = getDateKey()
-                  const recordKey = `${dateKey}-${minutesStudentSports}-${minutesStudentId}`
-                  setAttendance(prev => ({
-                    ...prev,
-                    [recordKey]: parseFloat(minutesInput)
-                  }))
-                  setMinutesModalOpen(false)
-                  setMinutesStudentId(null)
-                  setMinutesStudentSports(null)
-                  setMinutesInput('60')
+                  const recordKey = `${dateKey}-direct-input-${minutesStudentSports}-${minutesStudentId}`
+
+                  try {
+                    const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
+                    await setDoc(classDoc, {
+                      [recordKey]: parseFloat(minutesInput)
+                    }, { merge: true })
+
+                    setAttendance(prev => ({
+                      ...prev,
+                      [recordKey]: parseFloat(minutesInput)
+                    }))
+                    setMinutesModalOpen(false)
+                    setMinutesStudentId(null)
+                    setMinutesStudentSports(null)
+                    setMinutesInput('60')
+                  } catch (error) {
+                    console.error('저장 실패:', error)
+                    alert('저장 실패: ' + error.message)
+                  }
                 }}
                 style={{
                   flex: 1,
@@ -538,18 +577,29 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
             </div>
 
             <button
-              onClick={() => {
+              onClick={async () => {
                 const dateKey = getDateKey()
-                const recordKey = `${dateKey}-${minutesStudentSports}-${minutesStudentId}`
-                setAttendance(prev => {
-                  const newAttendance = {...prev}
-                  delete newAttendance[recordKey]
-                  return newAttendance
-                })
-                setMinutesModalOpen(false)
-                setMinutesStudentId(null)
-                setMinutesStudentSports(null)
-                setMinutesInput('60')
+                const recordKey = `${dateKey}-direct-input-${minutesStudentSports}-${minutesStudentId}`
+
+                try {
+                  const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
+                  await setDoc(classDoc, {
+                    [recordKey]: deleteField()
+                  }, { merge: true })
+
+                  setAttendance(prev => {
+                    const newAttendance = {...prev}
+                    delete newAttendance[recordKey]
+                    return newAttendance
+                  })
+                  setMinutesModalOpen(false)
+                  setMinutesStudentId(null)
+                  setMinutesStudentSports(null)
+                  setMinutesInput('60')
+                } catch (error) {
+                  console.error('삭제 실패:', error)
+                  alert('삭제 실패: ' + error.message)
+                }
               }}
               style={{
                 width: '100%',

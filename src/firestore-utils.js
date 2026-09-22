@@ -23,9 +23,16 @@ export const getAttendanceData = async (classId) => {
 
 export const setAttendanceData = async (classId, data) => {
   try {
-    console.log('💾 출석 저장 시작:', { classId, dataKeys: Object.keys(data), dataSize: Object.keys(data).length })
+    const dataKeys = Object.keys(data);
+    console.log('💾 출석 저장 시작:', {
+      classId,
+      dataSize: dataKeys.length,
+      sampleKeys: dataKeys.slice(0, 3)
+    })
+
     await waitForAuth()
     const classDoc = doc(db, 'classes', classId, 'data', 'attendance')
+
     const updateData = {}
     Object.entries(data).forEach(([key, value]) => {
       if (value && value > 0) {
@@ -34,11 +41,17 @@ export const setAttendanceData = async (classId, data) => {
         updateData[key] = deleteField()
       }
     })
-    console.log('💾 Firestore에 저장할 데이터:', updateData)
+
+    console.log('💾 Firestore 저장 데이터:', {
+      updateCount: Object.keys(updateData).length,
+      sampleData: Object.entries(updateData).slice(0, 2)
+    })
+
     await setDoc(classDoc, updateData, { merge: true })
     console.log('✓ 출석 데이터 저장 성공')
   } catch (error) {
     console.error('✗ 출석 데이터 저장 실패:', error.code, error.message)
+    throw error
   }
 }
 
