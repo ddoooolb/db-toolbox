@@ -72,7 +72,8 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
     const dateKey = getDateKey()
     const recordKey = `${dateKey}-${activeTimeSlot}-${student.sports}-${student.id}`
     const currentMinutes = attendance[recordKey]
-    const isMarked = currentMinutes && parseFloat(currentMinutes) > 0
+    const numMinutes = currentMinutes ? parseFloat(currentMinutes) : 0
+    const isMarked = numMinutes > 0
 
     if (activeTimeSlot === 'direct-input') {
       setMinutesStudentId(student.id)
@@ -188,9 +189,10 @@ function AttendanceMain({ students, attendance, setAttendance, classId = 'class1
                 const dateKey = getDateKey()
                 const recordKey = `${dateKey}-${activeTimeSlot}-${student.sports}-${student.id}`
                 const minutes = attendance[recordKey]
-                const isMarked = minutes && parseFloat(minutes) > 0
-                const hours = minutes ? Math.floor(parseFloat(minutes) / 60) : 0
-                const mins = minutes ? parseFloat(minutes) % 60 : 0
+                const numMinutes = minutes ? parseFloat(minutes) : 0
+                const isMarked = numMinutes > 0
+                const hours = Math.floor(numMinutes / 60)
+                const mins = numMinutes % 60
 
                 // 첫 번째와 마지막 학생 로그
                 if (idx === 0 || idx === filteredStudents.length - 1) {
